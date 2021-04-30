@@ -1,4 +1,4 @@
-package nl.b3p.formapi;
+package nl.b3p.featureapi;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

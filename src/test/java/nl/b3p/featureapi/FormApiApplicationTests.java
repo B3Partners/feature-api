@@ -1,6 +1,5 @@
-package nl.b3p.formapi;
+package nl.b3p.featureapi;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest

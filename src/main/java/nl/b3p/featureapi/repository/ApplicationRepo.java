@@ -1,4 +1,4 @@
-package nl.b3p.formapi.repository;
+package nl.b3p.featureapi.repository;
 
 import nl.b3p.viewer.config.app.Application;
 import org.springframework.data.jpa.repository.JpaRepository;

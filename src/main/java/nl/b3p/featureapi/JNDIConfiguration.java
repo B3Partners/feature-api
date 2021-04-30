@@ -1,4 +1,4 @@
-package nl.b3p.formapi;
+package nl.b3p.featureapi;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;

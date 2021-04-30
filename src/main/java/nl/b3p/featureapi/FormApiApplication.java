@@ -1,4 +1,4 @@
-package nl.b3p.formapi;
+package nl.b3p.featureapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
