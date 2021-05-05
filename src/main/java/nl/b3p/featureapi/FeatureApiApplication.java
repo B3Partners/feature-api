@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class FormApiApplication {
+public class FeatureApiApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(FormApiApplication.class, args);
+        SpringApplication.run(FeatureApiApplication.class, args);
     }
 }

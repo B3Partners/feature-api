@@ -68,6 +68,7 @@ public class FeatureHelper {
         }
         FeatureIterator<SimpleFeature> it = null;
         try {
+
             it = fs.getFeatures(q).features();
             int featureIndex = 0;
             while (it.hasNext()) {
@@ -119,7 +120,8 @@ public class FeatureHelper {
         if (ft.hasRelations()) {
             populateWithRelatedFeatures(j, f, ft, al, index);
         }
-        j.put(Feature.FID, f.getID());
+
+        j.put(Feature.FID, f.getIdentifier());
         return j;
     }
 
