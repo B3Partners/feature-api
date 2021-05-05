@@ -15,7 +15,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Configuration
-@EntityScan(basePackages = {"nl.b3p.viewer.config"})
+@EntityScan(basePackages = {"nl.viewer.config"})
 public class JPAConfiguration {
 
     @Autowired

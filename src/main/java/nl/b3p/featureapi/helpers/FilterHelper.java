@@ -1,9 +1,9 @@
 package nl.b3p.featureapi.helpers;
 
-import nl.b3p.viewer.config.services.AttributeDescriptor;
-import nl.b3p.viewer.config.services.FeatureTypeRelation;
-import nl.b3p.viewer.config.services.FeatureTypeRelationKey;
-import nl.b3p.viewer.config.services.SimpleFeatureType;
+import nl.viewer.config.services.AttributeDescriptor;
+import nl.viewer.config.services.FeatureTypeRelation;
+import nl.viewer.config.services.FeatureTypeRelationKey;
+import nl.viewer.config.services.SimpleFeatureType;
 import org.geotools.data.Query;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.visitor.SimplifyingFilterVisitor;
@@ -22,7 +22,7 @@ public class FilterHelper {
     /**
      *
      * Optimze and reformat filter. Delegates to
-     * {@link #reformatFilter(org.opengis.filter.Filter, nl.b3p.viewer.config.services.SimpleFeatureType, boolean)}
+     * {@link #reformatFilter(org.opengis.filter.Filter, nl.viewer.config.services.SimpleFeatureType, boolean)}
      * with the {@code includeRelations} set to {@code true}.
      *
      * @param filter the filter to process
@@ -30,7 +30,7 @@ public class FilterHelper {
      * @return reformatted / optimised filter
      * @throws Exception if any
      * @see #reformatFilter(org.opengis.filter.Filter,
-     * nl.b3p.viewer.config.services.SimpleFeatureType, boolean)
+     * nl.viewer.config.services.SimpleFeatureType, boolean)
      */
     public static Filter reformatFilter(Filter filter, SimpleFeatureType ft) throws Exception {
         return reformatFilter(filter, ft, true);

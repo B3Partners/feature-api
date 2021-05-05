@@ -1,9 +1,8 @@
 package nl.b3p.featureapi.helpers;
 
-import nl.b3p.featureapi.controller.FeatureController;
-import nl.b3p.geotools.data.arcgis.ArcGISDataStoreFactory;
-import nl.b3p.viewer.config.services.JDBCFeatureSource;
-import nl.b3p.viewer.config.services.SimpleFeatureType;
+import nl.geotools.data.arcgis.ArcGISDataStoreFactory;
+import nl.viewer.config.services.JDBCFeatureSource;
+import nl.viewer.config.services.SimpleFeatureType;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
@@ -29,7 +28,7 @@ public class FeatureSourceFactoryHelper {
     }
 
     public static DataStore getDatastore(SimpleFeatureType sft) throws Exception {
-        nl.b3p.viewer.config.services.FeatureSource fs = sft.getFeatureSource();
+        nl.viewer.config.services.FeatureSource fs = sft.getFeatureSource();
         Map params = new HashMap();
         switch(fs.getProtocol()){
             case "jdbc":
