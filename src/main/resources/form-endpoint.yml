@@ -6,6 +6,100 @@ servers:
 - url: http://localhost:8080
   description: Generated server url
 paths:
+  /features/{objectGuid}:
+    put:
+      tags:
+      - feature-controller
+      operationId: update
+      parameters:
+      - name: objectGuid
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Feature'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feature'
+  /features:
+    post:
+      tags:
+      - feature-controller
+      operationId: save
+      parameters:
+      - name: parentId
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Feature'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feature'
+  /features/{application}/{featureTypes}/{x}/{y}/{scale}:
+    get:
+      tags:
+      - feature-controller
+      operationId: featuretypeOnPoint
+      parameters:
+      - name: application
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: featureTypes
+        in: path
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+      - name: x
+        in: path
+        required: true
+        schema:
+          type: number
+          format: double
+      - name: "y"
+        in: path
+        required: true
+        schema:
+          type: number
+          format: double
+      - name: scale
+        in: path
+        required: true
+        schema:
+          type: number
+          format: double
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feature'
   /features/{application}/{appLayerId}/{x}/{y}/{scale}:
     get:
       tags:
@@ -46,12 +140,12 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Feature'
-  /features/2/{application}/{appLayerIds}/{x}/{y}/{scale}:
+  /features/{application}/{appLayerIds}/{x}/{y}/{scale}:
     get:
       tags:
       - feature-controller
@@ -93,11 +187,82 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Feature'
+  /features/info/{appId}/{featureTypes}:
+    get:
+      tags:
+      - feature-controller
+      operationId: featuretypeInformation
+      parameters:
+      - name: appId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: featureTypes
+        in: path
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FeaturetypeMetadata'
+  /attributes/{ids}:
+    get:
+      tags:
+      - attribute-controller
+      operationId: attributes
+      parameters:
+      - name: ids
+        in: path
+        required: true
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Attribuut'
+  /features/{featuretype}/{objectGuid}:
+    delete:
+      tags:
+      - feature-controller
+      operationId: delete
+      parameters:
+      - name: featuretype
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: objectGuid
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
 components:
   schemas:
     Attribute:
@@ -109,6 +274,18 @@ components:
           type: string
         value:
           type: object
+    Crs:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - name
+          - link
+        properties:
+          type: object
+          additionalProperties:
+            type: object
     Feature:
       type: object
       properties:
@@ -127,7 +304,27 @@ components:
           items:
             $ref: '#/components/schemas/Feature'
         fid:
-          type: object
+          type: string
+        defaultGeometryField:
+          type: string
+        objecttype:
+          type: string
+        defaultGeometry:
+          $ref: '#/components/schemas/Geometry'
+    Geometry:
+      type: object
+      properties:
+        crs:
+          $ref: '#/components/schemas/Crs'
+        bbox:
+          type: array
+          items:
+            type: number
+            format: double
+        coordinates:
+          type: array
+          items:
+            type: object
     Relation:
       type: object
       properties:
@@ -138,3 +335,77 @@ components:
           format: int64
         foreignFeatureTypeName:
           type: string
+    FeaturetypeMetadata:
+      type: object
+      properties:
+        featuretypeName:
+          type: string
+        geometryAttribute:
+          type: string
+        geometryType:
+          type: string
+          enum:
+          - LINESTRING
+          - POINT
+          - POLYGON
+          - GEOMETRY
+    Attribuut:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        naam:
+          type: string
+        kolom_naam:
+          type: string
+        object_naam:
+          type: string
+        tabel_naam:
+          type: string
+        muteerbaar:
+          type: boolean
+        domein:
+          $ref: '#/components/schemas/Domein'
+    Domein:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        naam:
+          type: string
+        leeg_toestaan:
+          type: boolean
+        waardes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domeinwaarde'
+        parent:
+          $ref: '#/components/schemas/Domein'
+        linkedDomains:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domein'
+    Domeinwaarde:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        waarde:
+          type: string
+        afkorting:
+          type: string
+        synoniem:
+          type: string
+        volgorde:
+          type: number
+          format: double
+        domein_id:
+          type: integer
+          format: int64
+        linkedDomeinwaardes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domeinwaarde'

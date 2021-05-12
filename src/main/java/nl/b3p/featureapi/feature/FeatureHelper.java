@@ -1,5 +1,6 @@
 package nl.b3p.featureapi.feature;
 
+import nl.b3p.featureapi.controller.FeatureController;
 import nl.b3p.featureapi.helpers.FeatureSourceFactoryHelper;
 import nl.b3p.featureapi.helpers.FilterHelper;
 import nl.b3p.featureapi.helpers.UploadsHelper;
@@ -107,7 +108,8 @@ public class FeatureHelper {
     private static Feature createFeature(SimpleFeature f, SimpleFeatureType ft, ApplicationLayer al,
                                          List<String> propertyNames, Map<String, String> attributeAliases, int index) throws JSONException, Exception {
         Feature j = new Feature();
-        j.setClazz(ft.getTypeName());
+        String typename = ft.getTypeName();
+        j.setClazz(typename.startsWith(FeatureController.GBI_PREFIX) ? typename.substring(FeatureController.GBI_PREFIX.length()) : typename );
 
         for (String name : propertyNames) {
             if (f.getAttribute(name) instanceof Geometry) {

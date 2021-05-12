@@ -1,5 +1,6 @@
 package nl.b3p.featureapi.resource;
 
+import org.geojson.Geometry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +15,9 @@ public class Feature {
     protected List<Relation> relations = new ArrayList<>();
     protected List<Feature> children = new ArrayList<>();
 
-    public Object getFID(){
-        return attributes.stream().filter(attribute -> attribute.getKey().equals(FID)).findFirst().orElseThrow().getValue();
+
+    public String getFID(){
+        return attributes.stream().filter(attribute -> attribute.getKey().equals(FID)).findFirst().orElseThrow().getValue().toString();
     }
     public void put(String key, Object value){
         attributes.add(new Attribute(key, value));
@@ -26,6 +28,10 @@ public class Feature {
     }
 
     public String getClazz() {
+        return clazz;
+    }
+
+    public String getObjecttype(){
         return clazz;
     }
 
@@ -44,4 +50,12 @@ public class Feature {
         return attributes;
     }
 
+    public Geometry getDefaultGeometry(){
+        // todo implement
+        return null;
+    }
+    public String getDefaultGeometryField(){
+        // todo implement
+        return null;
+    }
 }
