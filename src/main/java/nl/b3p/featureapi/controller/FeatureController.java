@@ -25,7 +25,6 @@ import org.opengis.filter.FilterFactory2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
@@ -179,8 +178,6 @@ public class FeatureController {
         return feature;
     }
 
-
-    @Transactional
     @DeleteMapping("/{application}/{featuretype}/{fid}")
     public boolean delete(@PathVariable Long application, @PathVariable String featuretype,
                        @PathVariable String fid) throws Exception {
