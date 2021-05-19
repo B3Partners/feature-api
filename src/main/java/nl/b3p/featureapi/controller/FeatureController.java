@@ -2,9 +2,9 @@ package nl.b3p.featureapi.controller;
 
 import nl.b3p.featureapi.feature.FeatureHelper;
 import nl.b3p.featureapi.helpers.FeatureSourceFactoryHelper;
+import nl.b3p.featureapi.helpers.EditFeatureHelper;
 import nl.b3p.featureapi.repository.ApplicationLayerRepo;
 import nl.b3p.featureapi.repository.ApplicationRepo;
-import nl.b3p.featureapi.repository.SimpleFeatureTypeRepo;
 import nl.b3p.featureapi.resource.Feature;
 import nl.b3p.featureapi.resource.FeaturetypeMetadata;
 import nl.b3p.featureapi.resource.GeometryType;
@@ -12,8 +12,7 @@ import nl.viewer.config.app.Application;
 import nl.viewer.config.app.ApplicationLayer;
 import nl.viewer.config.services.Layer;
 import nl.viewer.config.services.SimpleFeatureType;
-import org.geotools.data.FeatureSource;
-import org.geotools.data.Query;
+import org.geotools.data.*;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureIterator;
 import org.locationtech.jts.geom.Coordinate;
@@ -29,12 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -42,8 +36,6 @@ import java.util.stream.Collectors;
 @RestController
 public class FeatureController {
     Logger log = LoggerFactory.getLogger(FeatureController.class);
-
-    public static final String GBI_PREFIX = "gb_";
 
     private boolean graph = false;
 
@@ -60,7 +52,7 @@ public class FeatureController {
     private EntityManager em;
 
     @GetMapping(value = "/{application}/{x}/{y}/{scale}")
-    public List<Feature> featuretypeOnPoint(@PathVariable Long application, @PathVariable double x,
+    public List<Feature> onPoint(@PathVariable Long application, @PathVariable double x,
                                             @PathVariable double y, @PathVariable double scale)  throws Exception {
 
         Application app = appRepo.findById(application).orElseThrow();
@@ -79,7 +71,8 @@ public class FeatureController {
         return features;
     }
     @GetMapping(value = "/{application}/{featureTypes}/{x}/{y}/{scale}")
-    public List<Feature> featuretypeOnPoint(@PathVariable Long application, @PathVariable List<String> featureTypes, @PathVariable double x,
+    public List<Feature> featuretypeOnPoint(@PathVariable Long application, @PathVariable List<String> featureTypes,
+                                            @PathVariable double x,
                                             @PathVariable double y, @PathVariable double scale)  throws Exception {
         List<ApplicationLayer> applicationLayers = getApplayers(featureTypes, application);
         Application app = appRepo.findById(application).orElseThrow();
@@ -142,18 +135,54 @@ public class FeatureController {
         return features;
     }
 
-    @PostMapping
-    public Feature save(@RequestBody Feature f, @RequestParam(required = false) String parentId) throws Exception {
-        return null;
+    @PostMapping("/{application}/{featuretype}")
+    public Feature save(@RequestBody Feature f, @RequestParam(required = false) String parentId,
+                        @PathVariable Long application,@PathVariable String featuretype) throws Exception {
+        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application);
+
+        if (applicationLayers.isEmpty() ) {
+            throw new IllegalArgumentException("Featuretype has no applayer in db");
+        }
+        ApplicationLayer appLayer = applicationLayers.get(0);
+
+        Layer layer = getLayer(appLayer);
+        if (layer.getFeatureType() == null) {
+            throw new IllegalArgumentException("Layer has no featuretype configured");
+        }
+
+        SimpleFeatureType sft = layer.getFeatureType();
+        Application app = this.appRepo.findById(application).orElseThrow();
+        Feature savedFeature = EditFeatureHelper.save(appLayer, em, f, sft, app);
+
+        return savedFeature;
     }
 
-    @PutMapping("/{objectGuid}")
-    public Feature update(@PathVariable  String objectGuid, @RequestBody Feature feature) throws Exception {
-        return null;
+    @PutMapping("/{application}/{featuretype}/{fid}")
+    public Feature update(@PathVariable Long application, @PathVariable String featuretype,
+                          @PathVariable String fid, @RequestBody Feature feature) throws Exception {
+
+        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application);
+
+        if (applicationLayers.isEmpty() ) {
+            throw new IllegalArgumentException("Featuretype has no applayers configured in DB");
+        }
+        ApplicationLayer appLayer = applicationLayers.get(0);
+        Application app = this.appRepo.findById(application).orElseThrow();
+
+        Layer layer = getLayer(appLayer);
+        if (layer.getFeatureType() == null) {
+            throw new IllegalArgumentException("Layer has no featuretype configured");
+        }
+
+        SimpleFeatureType sft = layer.getFeatureType();
+        feature = EditFeatureHelper.update(appLayer, layer, feature, fid, em, sft, app);
+        return feature;
     }
+
+
     @Transactional
-    @DeleteMapping("{featuretype}/{objectGuid}")
-    public void delete(@PathVariable String featuretype, @PathVariable String objectGuid) throws Exception {
+    @DeleteMapping("/{application}/{featuretype}/{fid}")
+    public void delete(@PathVariable String featuretype, @PathVariable String fid) throws Exception {
 
     }
 
@@ -168,8 +197,9 @@ public class FeatureController {
             Layer l = getLayer(al);
             if(l !=null && l.getFeatureType() != null){
                 SimpleFeatureType sft =l.getFeatureType();
-
-                fm.featuretypeName = sft.getTypeName();
+                String featureTypeName = sft.getTypeName();
+                String processedFTName = FeatureHelper.stripGBIName(featureTypeName);
+                fm.featuretypeName =processedFTName;
                 fm.geometryAttribute = sft.getGeometryAttribute();
                 fm.geometryType = GeometryType.fromValue(sft.getAttribute(fm.geometryAttribute).getType()).orElse(GeometryType.GEOMETRY);
                 md.add(fm);
@@ -181,7 +211,7 @@ public class FeatureController {
     private Layer getLayer(ApplicationLayer al){
         Layer l =  al.getService().getLayer(al.getLayerName(), em);
         if( l== null){//this check must/can be removed if the layername isn't changed by the frontend and passport converter anymore
-            l =  al.getService().getLayer(GBI_PREFIX+al.getLayerName(), em);
+            l =  al.getService().getLayer(FeatureHelper.GBI_PREFIX+al.getLayerName(), em);
         }
         return l;
     }
@@ -212,8 +242,8 @@ public class FeatureController {
    //this method must/can be removed if the layername isn't changed by the frontend and passport converter anymore
     private boolean appLayerInFeatureTypes(ApplicationLayer al, List<String> featureTypes){
         String origName = al.getLayerName();
-        if(origName.contains(GBI_PREFIX)){
-            String strippedGbiName = origName.substring(origName.indexOf(GBI_PREFIX) + GBI_PREFIX.length());
+        if(origName.contains(FeatureHelper.GBI_PREFIX)){
+            String strippedGbiName = FeatureHelper.stripGBIName(origName);
 
             return featureTypes.contains(strippedGbiName) || featureTypes.contains(origName);
 

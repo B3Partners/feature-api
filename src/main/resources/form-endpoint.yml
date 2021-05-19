@@ -6,13 +6,24 @@ servers:
 - url: http://localhost:8080
   description: Generated server url
 paths:
-  /features/{objectGuid}:
+  /features/{application}/{featuretype}/{fid}:
     put:
       tags:
       - feature-controller
       operationId: update
       parameters:
-      - name: objectGuid
+      - name: application
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: featuretype
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: fid
         in: path
         required: true
         schema:
@@ -30,7 +41,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Feature'
-  /features:
+    delete:
+      tags:
+      - feature-controller
+      operationId: delete
+      parameters:
+      - name: featuretype
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: fid
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /features/{application}/{featuretype}:
     post:
       tags:
       - feature-controller
@@ -39,6 +68,17 @@ paths:
       - name: parentId
         in: query
         required: false
+        schema:
+          type: string
+      - name: application
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: featuretype
+        in: path
+        required: true
         schema:
           type: string
       requestBody:
@@ -54,6 +94,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Feature'
+  /features/{application}/{x}/{y}/{scale}:
+    get:
+      tags:
+      - feature-controller
+      operationId: onPoint
+      parameters:
+      - name: application
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: x
+        in: path
+        required: true
+        schema:
+          type: number
+          format: double
+      - name: "y"
+        in: path
+        required: true
+        schema:
+          type: number
+          format: double
+      - name: scale
+        in: path
+        required: true
+        schema:
+          type: number
+          format: double
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feature'
   /features/{application}/{featureTypes}/{x}/{y}/{scale}:
     get:
       tags:
@@ -73,98 +152,6 @@ paths:
           type: array
           items:
             type: string
-      - name: x
-        in: path
-        required: true
-        schema:
-          type: number
-          format: double
-      - name: "y"
-        in: path
-        required: true
-        schema:
-          type: number
-          format: double
-      - name: scale
-        in: path
-        required: true
-        schema:
-          type: number
-          format: double
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Feature'
-  /features/{application}/{appLayerId}/{x}/{y}/{scale}:
-    get:
-      tags:
-      - feature-controller
-      operationId: onPoint
-      parameters:
-      - name: application
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      - name: appLayerId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      - name: x
-        in: path
-        required: true
-        schema:
-          type: number
-          format: double
-      - name: "y"
-        in: path
-        required: true
-        schema:
-          type: number
-          format: double
-      - name: scale
-        in: path
-        required: true
-        schema:
-          type: number
-          format: double
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Feature'
-  /features/{application}/{appLayerIds}/{x}/{y}/{scale}:
-    get:
-      tags:
-      - feature-controller
-      operationId: onPoint_1
-      parameters:
-      - name: application
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      - name: appLayerIds
-        in: path
-        required: true
-        schema:
-          type: array
-          items:
-            type: integer
-            format: int64
       - name: x
         in: path
         required: true
@@ -244,25 +231,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Attribuut'
-  /features/{featuretype}/{objectGuid}:
-    delete:
-      tags:
-      - feature-controller
-      operationId: delete
-      parameters:
-      - name: featuretype
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: objectGuid
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
 components:
   schemas:
     Attribute:
@@ -303,14 +271,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Feature'
-        fid:
-          type: string
         defaultGeometryField:
-          type: string
-        objecttype:
           type: string
         defaultGeometry:
           $ref: '#/components/schemas/Geometry'
+        fid:
+          type: string
+        objecttype:
+          type: string
     Geometry:
       type: object
       properties:
@@ -404,7 +372,7 @@ components:
           format: double
         domein_id:
           type: integer
-          format: int64
+          format: int32
         linkedDomeinwaardes:
           type: array
           items:

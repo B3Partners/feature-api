@@ -35,6 +35,7 @@ import java.util.Map;
 public class FeatureHelper {
     private static final Log log = LogFactory.getLog(FeatureHelper.class);
     public static final int MAX_FEATURES = 1000;
+    public static final String GBI_PREFIX = "gb_";
 
     public static List<Feature> getFeatures(ApplicationLayer al, SimpleFeatureType ft, FeatureSource fs, Query q,
                                             String sort, String dir,
@@ -109,7 +110,8 @@ public class FeatureHelper {
                                          List<String> propertyNames, Map<String, String> attributeAliases, int index) throws JSONException, Exception {
         Feature j = new Feature();
         String typename = ft.getTypeName();
-        j.setClazz(typename.startsWith(FeatureController.GBI_PREFIX) ? typename.substring(FeatureController.GBI_PREFIX.length()) : typename );
+
+        j.setClazz(stripGBIName(typename));
 
         for (String name : propertyNames) {
             if (f.getAttribute(name) instanceof Geometry) {
@@ -123,7 +125,9 @@ public class FeatureHelper {
             populateWithRelatedFeatures(j, f, ft, al, index);
         }
 
-        j.put(Feature.FID, f.getIdentifier());
+        String id = f.getID();
+        id = id.substring(id.lastIndexOf(".")+1);
+        j.put(Feature.FID, id);
         return j;
     }
 
@@ -285,4 +289,14 @@ public class FeatureHelper {
         FilterHelper.setSortBy(q, sortAttribute, dir);
     }
 
+    public static String stripGBIName(String name){
+        if(name.contains(":")) {
+            name = name.substring(name.indexOf(":") + 1);
+        }
+        if(name.contains(GBI_PREFIX)){
+            name = name.substring(name.indexOf(GBI_PREFIX) + GBI_PREFIX.length());
+        }
+        name = name.replaceAll("_", "");
+        return name;
+    }
 }
