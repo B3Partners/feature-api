@@ -15,6 +15,7 @@ import nl.viewer.config.services.SimpleFeatureType;
 import org.geotools.data.*;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureIterator;
+import org.geotools.filter.identity.FeatureIdImpl;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.util.GeometricShapeFactory;
@@ -120,7 +121,6 @@ public class FeatureController {
             q.setFilter(spatialFilter);
 
             features = FeatureHelper.getFeatures(appLayer, sft, fs, q, null, null, em, app);
-
         } catch (Exception e) {
             log.error("IOException ", e);
             throw e;
@@ -182,8 +182,26 @@ public class FeatureController {
 
     @Transactional
     @DeleteMapping("/{application}/{featuretype}/{fid}")
-    public void delete(@PathVariable String featuretype, @PathVariable String fid) throws Exception {
+    public boolean delete(@PathVariable Long application, @PathVariable String featuretype,
+                       @PathVariable String fid) throws Exception {
+        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application);
 
+        if (applicationLayers.isEmpty() ) {
+            throw new IllegalArgumentException("Featuretype has no applayers configured in DB");
+        }
+        ApplicationLayer appLayer = applicationLayers.get(0);
+
+        Layer layer = getLayer(appLayer);
+        if (layer.getFeatureType() == null) {
+            throw new IllegalArgumentException("Layer has no featuretype configured");
+        }
+        try{
+            EditFeatureHelper.deleteFeature(appLayer, em, fid);
+            return true;
+        }catch(Exception e){
+            log.error("Cannot remove feature: ", e);
+            return false;
+        }
     }
 
     @GetMapping(value = "/info/{appId}/{featureTypes}")

@@ -114,6 +114,27 @@ public class EditFeatureHelper {
     }
 
 
+    public static boolean deleteFeature(ApplicationLayer appLayer, EntityManager em, String fid) throws Exception {
+        SimpleFeatureStore store = getDatastore(appLayer, em);
+
+        Transaction transaction = new DefaultTransaction("edit");
+        store.setTransaction(transaction);
+
+        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
+        Filter filter = ff.id(new FeatureIdImpl(fid));
+
+        try {
+            store.removeFeatures(filter);
+            transaction.commit();
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
+            throw e;
+        } finally {
+            transaction.close();
+        }
+    }
+
     public static Feature save(ApplicationLayer appLayer, EntityManager em, Feature feature,
                                SimpleFeatureType sft, Application app) throws Exception {
         SimpleFeatureStore store = getDatastore(appLayer, em);

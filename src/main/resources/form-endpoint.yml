@@ -46,6 +46,12 @@ paths:
       - feature-controller
       operationId: delete
       parameters:
+      - name: application
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       - name: featuretype
         in: path
         required: true
@@ -59,6 +65,10 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
   /features/{application}/{featuretype}:
     post:
       tags:
@@ -271,13 +281,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Feature'
-        defaultGeometryField:
-          type: string
         defaultGeometry:
           $ref: '#/components/schemas/Geometry'
         fid:
           type: string
         objecttype:
+          type: string
+        defaultGeometryField:
           type: string
     Geometry:
       type: object
