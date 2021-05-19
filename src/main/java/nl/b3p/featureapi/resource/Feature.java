@@ -1,11 +1,8 @@
 package nl.b3p.featureapi.resource;
 
-import org.geojson.Geometry;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class Feature {
     public static final String FID = "__fid";
@@ -19,8 +16,8 @@ public class Feature {
     public String getFID(){
         return attributes.stream().filter(attribute -> attribute.getKey().equals(FID)).findFirst().orElseThrow().getValue().toString();
     }
-    public void put(String key, Object value){
-        attributes.add(new Attribute(key, value));
+    public void put(String key, Object value, String type){
+        attributes.add(new Attribute(key, value, type));
     }
 
     public void setClazz(String clazz){
@@ -50,12 +47,18 @@ public class Feature {
         return attributes;
     }
 
-    public Geometry getDefaultGeometry(){
-        // todo implement
-        return null;
+    public String getDefaultGeometry(){
+        Optional<Attribute> opt =  attributes.stream().filter(attribute -> {
+            Optional<GeometryType> gt = GeometryType.fromValue(attribute.getType());
+            return gt.isPresent() ;
+        }).findFirst();
+        return opt.isPresent() ? (String) opt.get().getValue() : null;
     }
     public String getDefaultGeometryField(){
-        // todo implement
-        return null;
+        Optional<Attribute> opt =  attributes.stream().filter(attribute -> {
+            Optional<GeometryType> gt = GeometryType.fromValue(attribute.getType());
+            return gt.isPresent() ;
+        }).findFirst();
+        return opt.isPresent() ? opt.get().getKey() : null;
     }
 }

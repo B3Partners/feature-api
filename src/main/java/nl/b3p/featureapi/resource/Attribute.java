@@ -5,9 +5,10 @@ public class Attribute {
     private String key;
     private Object value;
 
-    public Attribute(String key, Object value) {
+    public Attribute(String key, Object value, String type) {
         this.key = key;
         this.value = value;
+        this.type = type;
     }
 
     public String getType() {

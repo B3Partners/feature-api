@@ -5,6 +5,7 @@ import nl.b3p.featureapi.helpers.FeatureSourceFactoryHelper;
 import nl.b3p.featureapi.helpers.FilterHelper;
 import nl.b3p.featureapi.helpers.UploadsHelper;
 import nl.b3p.featureapi.resource.Feature;
+import nl.b3p.featureapi.resource.GeometryType;
 import nl.b3p.featureapi.resource.Relation;
 import nl.viewer.config.app.Application;
 import nl.viewer.config.app.ApplicationLayer;
@@ -114,10 +115,13 @@ public class FeatureHelper {
         j.setClazz(stripGBIName(typename));
 
         for (String name : propertyNames) {
-            if (f.getAttribute(name) instanceof Geometry) {
-                j.put(name, ((Geometry) f.getAttribute(name)).toText());
+            Object value = f.getAttribute(name);
+            AttributeDescriptor ad = ft.getAttribute(name);
+
+            if (value instanceof Geometry) {
+                j.put(name, ((Geometry) f.getAttribute(name)).toText(), GeometryType.fromValue(((Geometry) value).getGeometryType()).get().name());
             } else {
-                j.put(name, f.getAttribute(name));
+                j.put(name, value, ad.getType());
             }
         }
 
@@ -127,7 +131,7 @@ public class FeatureHelper {
 
         String id = f.getID();
         id = id.substring(id.lastIndexOf(".")+1);
-        j.put(Feature.FID, id);
+        j.put(Feature.FID, id, "FID");
         return j;
     }
 
