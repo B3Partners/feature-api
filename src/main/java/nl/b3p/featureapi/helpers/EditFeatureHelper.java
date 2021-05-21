@@ -37,7 +37,7 @@ public class EditFeatureHelper {
 
     public static Feature update(ApplicationLayer appLayer, Layer layer, Feature feature, String fid,
                                  EntityManager em, SimpleFeatureType sft, Application app) throws Exception {
-        SimpleFeatureStore store = getDatastore(appLayer, em);
+        SimpleFeatureStore store = getDatastore(sft);
 
         Transaction transaction = new DefaultTransaction("edit");
         store.setTransaction(transaction);
@@ -61,7 +61,7 @@ public class EditFeatureHelper {
                         value = null;
                     }
                     if(value!= null) {
-                        if (!isAttributeUserEditingDisabled(attribute, appLayer, layer)) {
+                        if (!isAttributeUserEditingDisabled(attribute, appLayer, layer, sft)) {
 
                             attributes.add(attribute);
 
@@ -229,8 +229,8 @@ public class EditFeatureHelper {
     }
 */
 
-    protected static boolean isAttributeUserEditingDisabled(String attrName, ApplicationLayer appLayer, Layer layer) {
-        return appLayer.getAttribute(layer.getFeatureType(), attrName).isDisableUserEdit();
+    protected static boolean isAttributeUserEditingDisabled(String attrName, ApplicationLayer appLayer, Layer layer, SimpleFeatureType sft) {
+        return appLayer.getAttribute(sft, attrName).isDisableUserEdit();
     }
 
 
@@ -241,6 +241,11 @@ public class EditFeatureHelper {
             throw new IllegalArgumentException("Layer has no featuretype configured");
         }
         SimpleFeatureType sft = layer.getFeatureType();
+        return getDatastore(sft);
+    }
+
+    private static SimpleFeatureStore getDatastore(SimpleFeatureType sft ) throws Exception {
+
         FeatureSource ds = FeatureSourceFactoryHelper.getFeatureSource(sft);
         SimpleFeatureStore store =(SimpleFeatureStore) ds;
         return store;

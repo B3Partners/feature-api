@@ -28,10 +28,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
 
 import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FeatureHelper {
     private static final Log log = LogFactory.getLog(FeatureHelper.class);
@@ -119,6 +116,7 @@ public class FeatureHelper {
             AttributeDescriptor ad = ft.getAttribute(name);
 
             if (value instanceof Geometry) {
+                Optional<GeometryType> opt = GeometryType.fromValue(((Geometry) value).getGeometryType());
                 j.put(name, ((Geometry) f.getAttribute(name)).toText(), GeometryType.fromValue(((Geometry) value).getGeometryType()).get().name());
             } else {
                 j.put(name, value, ad.getType());
@@ -300,7 +298,6 @@ public class FeatureHelper {
         if(name.contains(GBI_PREFIX)){
             name = name.substring(name.indexOf(GBI_PREFIX) + GBI_PREFIX.length());
         }
-        name = name.replaceAll("_", "");
         return name;
     }
 }

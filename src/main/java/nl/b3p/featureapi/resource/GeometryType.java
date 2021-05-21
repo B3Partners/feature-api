@@ -5,8 +5,11 @@ import java.util.Optional;
 
 public enum GeometryType {
     LINESTRING("linestring"),
+    MULTILINESTRING("multilinestring"),
     POINT("point"),
+    MULTIPOINT("multipoint"),
     POLYGON ("polygon"),
+    MULTIPOLYGON ("multipolygon"),
     GEOMETRY ("geometry");
 
     GeometryType(String type){

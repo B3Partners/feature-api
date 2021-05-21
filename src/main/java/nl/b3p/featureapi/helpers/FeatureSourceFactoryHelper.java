@@ -1,7 +1,10 @@
 package nl.b3p.featureapi.helpers;
 
+import nl.b3p.featureapi.feature.FeatureHelper;
 import nl.geotools.data.arcgis.ArcGISDataStoreFactory;
+import nl.viewer.config.services.FeatureTypeRelation;
 import nl.viewer.config.services.JDBCFeatureSource;
+import nl.viewer.config.services.Layer;
 import nl.viewer.config.services.SimpleFeatureType;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
@@ -19,6 +22,32 @@ import java.util.Map;
 public class FeatureSourceFactoryHelper {
     private static Logger log = LoggerFactory.getLogger(FeatureSourceFactoryHelper.class);
     private static final int TIMEOUT = 5000;
+
+    public static SimpleFeatureType getSimpleFeatureType(Layer layer, String typename){
+        SimpleFeatureType type = layer.getFeatureType();
+
+        return getSimpleFeatureType(type, typename);
+    }
+    public static SimpleFeatureType getSimpleFeatureType(SimpleFeatureType sft, String typename){
+        if(isSimpleFeatureTypeTypename(typename, sft)){
+            return sft;
+        }else{
+            for(FeatureTypeRelation rel : sft.getRelations()){
+                SimpleFeatureType test = getSimpleFeatureType(rel.getForeignFeatureType(), typename);
+                if(test != null){
+                    return test;
+                }
+            }
+            return null;
+        }
+    }
+
+    private static boolean isSimpleFeatureTypeTypename(String name, SimpleFeatureType sft){
+        return  FeatureHelper.stripGBIName(name).equals(sft.getTypeName())
+                || name.equals(sft.getTypeName())
+                || name.equals(FeatureHelper.stripGBIName(sft.getTypeName()))
+                || FeatureHelper.stripGBIName(name).equals(FeatureHelper.stripGBIName(sft.getTypeName()));
+    }
 
     public static FeatureSource getFeatureSource(SimpleFeatureType sft) throws Exception {
 

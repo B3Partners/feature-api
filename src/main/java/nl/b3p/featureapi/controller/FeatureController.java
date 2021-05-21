@@ -149,7 +149,7 @@ public class FeatureController {
             throw new IllegalArgumentException("Layer has no featuretype configured");
         }
 
-        SimpleFeatureType sft = layer.getFeatureType();
+        SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featuretype);
         Application app = this.appRepo.findById(application).orElseThrow();
         Feature savedFeature = EditFeatureHelper.save(appLayer, em, f, sft, app);
 
@@ -173,7 +173,8 @@ public class FeatureController {
             throw new IllegalArgumentException("Layer has no featuretype configured");
         }
 
-        SimpleFeatureType sft = layer.getFeatureType();
+        SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featuretype);
+
         feature = EditFeatureHelper.update(appLayer, layer, feature, fid, em, sft, app);
         return feature;
     }
@@ -257,13 +258,42 @@ public class FeatureController {
    //this method must/can be removed if the layername isn't changed by the frontend and passport converter anymore
     private boolean appLayerInFeatureTypes(ApplicationLayer al, List<String> featureTypes){
         String origName = al.getLayerName();
+
+        List<String> sanitizedFTs = featureTypes.stream().map(s -> sanitizeName(s)).collect(Collectors.toList());
+
+        Layer l = getLayer(al);
+
+        SimpleFeatureType sft = l.getFeatureType();
+        return appLayerInFeatureTypes(sft, featureTypes, sanitizedFTs);
+    }
+
+    private boolean appLayerInFeatureTypes(SimpleFeatureType sft, List<String> featureTypes,List<String> sanitizedFTs) {
+        if(appLayerInFeatureTypes(sft.getTypeName(), featureTypes, sanitizedFTs)){
+            return true;
+        }
+
+        List<SimpleFeatureType> sfts = sft.getRelations().stream().map(featureTypeRelation -> featureTypeRelation.getForeignFeatureType()).collect(Collectors.toList());
+        for (SimpleFeatureType type: sfts) {
+            if(appLayerInFeatureTypes(type,featureTypes, sanitizedFTs)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean appLayerInFeatureTypes(String origName, List<String> featureTypes,List<String> sanitizedFTs) {
         if(origName.contains(FeatureHelper.GBI_PREFIX)){
             String strippedGbiName = FeatureHelper.stripGBIName(origName);
-
-            return featureTypes.contains(strippedGbiName) || featureTypes.contains(origName);
+            strippedGbiName = sanitizeName(strippedGbiName);
+            return featureTypes.contains(strippedGbiName) || sanitizedFTs.contains(origName);
 
         }else{
-            return  featureTypes.contains(origName);
+            //hier gaat iets niet goed: gemeentes_2020_v1 wordt niet gematched (eigenlijk gemeentes_2020v1, even kijken waar we dat sanitizen gelijktrekken)
+            return  sanitizedFTs.contains(origName) || sanitizedFTs.contains(sanitizeName(origName));
         }
+    }
+
+        private String sanitizeName(String name){
+        return name.replaceAll("_", "");
     }
 }
