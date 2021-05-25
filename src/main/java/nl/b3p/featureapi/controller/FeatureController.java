@@ -3,8 +3,10 @@ package nl.b3p.featureapi.controller;
 import nl.b3p.featureapi.feature.FeatureHelper;
 import nl.b3p.featureapi.helpers.FeatureSourceFactoryHelper;
 import nl.b3p.featureapi.helpers.EditFeatureHelper;
+import nl.b3p.featureapi.helpers.UserLayerHelper;
 import nl.b3p.featureapi.repository.ApplicationLayerRepo;
 import nl.b3p.featureapi.repository.ApplicationRepo;
+import nl.b3p.featureapi.repository.LayerRepo;
 import nl.b3p.featureapi.resource.Feature;
 import nl.b3p.featureapi.resource.FeaturetypeMetadata;
 import nl.b3p.featureapi.resource.GeometryType;
@@ -15,7 +17,6 @@ import nl.viewer.config.services.SimpleFeatureType;
 import org.geotools.data.*;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureIterator;
-import org.geotools.filter.identity.FeatureIdImpl;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.util.GeometricShapeFactory;
@@ -43,6 +44,8 @@ public class FeatureController {
 
     private boolean edit = false;
 
+    @Autowired
+    private LayerRepo layerRepo;
     @Autowired
     private ApplicationRepo appRepo;
     @Autowired
@@ -74,7 +77,7 @@ public class FeatureController {
     public List<Feature> featuretypeOnPoint(@PathVariable Long application, @PathVariable List<String> featureTypes,
                                             @PathVariable double x,
                                             @PathVariable double y, @PathVariable double scale)  throws Exception {
-        List<ApplicationLayer> applicationLayers = getApplayers(featureTypes, application);
+        List<ApplicationLayer> applicationLayers = getApplayers(featureTypes, application, false);
         Application app = appRepo.findById(application).orElseThrow();
         List<Feature> features = new ArrayList<>();
         applicationLayers.forEach(appLayer -> {
@@ -119,7 +122,7 @@ public class FeatureController {
 
             q.setFilter(spatialFilter);
 
-            features = FeatureHelper.getFeatures(appLayer, sft, fs, q, null, null, em, app);
+            features = FeatureHelper.getFeatures(appLayer, sft, fs, q, null, null, em, app, layerRepo);
         } catch (Exception e) {
             log.error("IOException ", e);
             throw e;
@@ -137,7 +140,7 @@ public class FeatureController {
     @PostMapping("/{application}/{featuretype}")
     public Feature save(@RequestBody Feature f, @RequestParam(required = false) String parentId,
                         @PathVariable Long application,@PathVariable String featuretype) throws Exception {
-        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application);
+        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application, true);
 
         if (applicationLayers.isEmpty() ) {
             throw new IllegalArgumentException("Featuretype has no applayer in db");
@@ -151,7 +154,7 @@ public class FeatureController {
 
         SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featuretype);
         Application app = this.appRepo.findById(application).orElseThrow();
-        Feature savedFeature = EditFeatureHelper.save(appLayer, em, f, sft, app);
+        Feature savedFeature = EditFeatureHelper.save(appLayer, em, f, sft, app, layerRepo);
 
         return savedFeature;
     }
@@ -160,7 +163,7 @@ public class FeatureController {
     public Feature update(@PathVariable Long application, @PathVariable String featuretype,
                           @PathVariable String fid, @RequestBody Feature feature) throws Exception {
 
-        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application);
+        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application, true);
 
         if (applicationLayers.isEmpty() ) {
             throw new IllegalArgumentException("Featuretype has no applayers configured in DB");
@@ -175,14 +178,14 @@ public class FeatureController {
 
         SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featuretype);
 
-        feature = EditFeatureHelper.update(appLayer, layer, feature, fid, em, sft, app);
+        feature = EditFeatureHelper.update(appLayer, layer, feature, fid, em, sft, app, layerRepo);
         return feature;
     }
 
     @DeleteMapping("/{application}/{featuretype}/{fid}")
     public boolean delete(@PathVariable Long application, @PathVariable String featuretype,
                        @PathVariable String fid) throws Exception {
-        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application);
+        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application, true);
 
         if (applicationLayers.isEmpty() ) {
             throw new IllegalArgumentException("Featuretype has no applayers configured in DB");
@@ -206,7 +209,7 @@ public class FeatureController {
     public List<FeaturetypeMetadata> featuretypeInformation(@PathVariable Long appId,
                                                             @PathVariable List<String> featureTypes) {
         List<FeaturetypeMetadata> md = new ArrayList<>();
-        List<ApplicationLayer> appLayers = getApplayers(featureTypes, appId);
+        List<ApplicationLayer> appLayers = getApplayers(featureTypes, appId, false);
 
         appLayers.forEach(al -> {
             FeaturetypeMetadata fm = new FeaturetypeMetadata();
@@ -232,11 +235,13 @@ public class FeatureController {
         return l;
     }
 
-    private List<ApplicationLayer> getApplayers(List<String> featureTypes, Long appId) {
+    private List<ApplicationLayer> getApplayers(List<String> featureTypes, Long appId, boolean forWriting) {
         Application app = appRepo.findById(appId).orElseThrow();
         Application.TreeCache tc = app.loadTreeCache(this.em);
         List<ApplicationLayer> all = tc.getApplicationLayers();
         List<ApplicationLayer> appLayers = filterAppLayers(featureTypes, all);
+
+        appLayers.addAll(UserLayerHelper.getOriginalsFromUserLayers(featureTypes, all, forWriting, layerRepo));
         return appLayers;
     }
 
@@ -288,7 +293,6 @@ public class FeatureController {
             return featureTypes.contains(strippedGbiName) || sanitizedFTs.contains(origName);
 
         }else{
-            //hier gaat iets niet goed: gemeentes_2020_v1 wordt niet gematched (eigenlijk gemeentes_2020v1, even kijken waar we dat sanitizen gelijktrekken)
             return  sanitizedFTs.contains(origName) || sanitizedFTs.contains(sanitizeName(origName));
         }
     }

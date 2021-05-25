@@ -1,19 +1,17 @@
 package nl.b3p.featureapi.feature;
 
-import nl.b3p.featureapi.controller.FeatureController;
 import nl.b3p.featureapi.helpers.FeatureSourceFactoryHelper;
 import nl.b3p.featureapi.helpers.FilterHelper;
 import nl.b3p.featureapi.helpers.UploadsHelper;
+import nl.b3p.featureapi.helpers.UserLayerHelper;
+import nl.b3p.featureapi.repository.LayerRepo;
 import nl.b3p.featureapi.resource.Feature;
 import nl.b3p.featureapi.resource.GeometryType;
 import nl.b3p.featureapi.resource.Relation;
 import nl.viewer.config.app.Application;
 import nl.viewer.config.app.ApplicationLayer;
 import nl.viewer.config.app.ConfiguredAttribute;
-import nl.viewer.config.services.AttributeDescriptor;
-import nl.viewer.config.services.FeatureTypeRelation;
-import nl.viewer.config.services.FeatureTypeRelationKey;
-import nl.viewer.config.services.SimpleFeatureType;
+import nl.viewer.config.services.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.geotools.data.FeatureSource;
@@ -34,10 +32,11 @@ public class FeatureHelper {
     private static final Log log = LogFactory.getLog(FeatureHelper.class);
     public static final int MAX_FEATURES = 1000;
     public static final String GBI_PREFIX = "gb_";
+    public final static String USERLAYER_SEPARATOR = "ul_";
 
     public static List<Feature> getFeatures(ApplicationLayer al, SimpleFeatureType ft, FeatureSource fs, Query q,
                                             String sort, String dir,
-                                            EntityManager em, Application application) throws Exception {
+                                            EntityManager em, Application application, LayerRepo layerRepo) throws Exception {
         List<Feature> features = new ArrayList<>();
 
         Map<String, String> attributeAliases = new HashMap<>();
@@ -87,7 +86,7 @@ public class FeatureHelper {
                     JSONObject jsonFeature = new JSONObject();
                     jsonFeature.put("__UPLOADS__", uploads);
                     // todo process uploads
-                    Feature j = createFeature(feature, ft, al, propertyNames, attributeAliases, 0);
+                    Feature j = createFeature(feature, ft, al, propertyNames, attributeAliases, 0, application, em, layerRepo);
 
                     features.add(j);
                 }
@@ -105,11 +104,12 @@ public class FeatureHelper {
 
 
     private static Feature createFeature(SimpleFeature f, SimpleFeatureType ft, ApplicationLayer al,
-                                         List<String> propertyNames, Map<String, String> attributeAliases, int index) throws JSONException, Exception {
+                                         List<String> propertyNames, Map<String, String> attributeAliases, int index,
+                                         Application app, EntityManager em, LayerRepo layerRepo) throws JSONException, Exception {
         Feature j = new Feature();
         String typename = ft.getTypeName();
 
-        j.setClazz(stripGBIName(typename));
+        j.setClazz(getTypename(typename, al, app, em, layerRepo));
 
         for (String name : propertyNames) {
             Object value = f.getAttribute(name);
@@ -124,7 +124,7 @@ public class FeatureHelper {
         }
 
         if (ft.hasRelations()) {
-            populateWithRelatedFeatures(j, f, ft, al, index);
+            populateWithRelatedFeatures(j, f, ft, al, index, app, em, layerRepo);
         }
 
         String id = f.getID();
@@ -133,11 +133,26 @@ public class FeatureHelper {
         return j;
     }
 
+    private static String getTypename(String typename, ApplicationLayer al, Application app, EntityManager em, LayerRepo layerRepo){
+        if(typename.contains(USERLAYER_SEPARATOR)){
+            Application.TreeCache tc = app.loadTreeCache(em);
+            List<ApplicationLayer> all = tc.getApplicationLayers();
+
+            Layer layer = al.getService().getLayer(al.getLayerName(), em);
+            ApplicationLayer applicationLayer = UserLayerHelper.getOriginalFromUserLayer(layer, all, true, layerRepo);
+            typename = applicationLayer.getLayerName();
+        }
+        typename = stripGBIName(typename);
+        return typename;
+    }
+
+
+
     /**
      * Populate the json object with related featues
      */
     private static void populateWithRelatedFeatures(Feature parent, SimpleFeature feature, SimpleFeatureType ft,
-                                                    ApplicationLayer al, int index) throws Exception {
+                                                    ApplicationLayer al, int index, Application app, EntityManager em, LayerRepo layerRepo) throws Exception {
         for (FeatureTypeRelation rel : ft.getRelations()) {
             boolean isJoin = rel.getType().equals(FeatureTypeRelation.JOIN);
 
@@ -187,7 +202,8 @@ public class FeatureHelper {
                 while (foreignIt.hasNext()) {
                     SimpleFeature foreignFeature = foreignIt.next();
                     //join it in the same json
-                    Feature other = createFeature(foreignFeature, rel.getForeignFeatureType(), al, propertyNames, attributeAliases, index);
+                    Feature other = createFeature(foreignFeature, rel.getForeignFeatureType(), al, propertyNames,
+                            attributeAliases, index, app, em, layerRepo);
                     if (isJoin) {
                         parent.joinAttributes(other);
                     } else {

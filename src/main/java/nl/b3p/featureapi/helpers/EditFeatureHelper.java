@@ -1,6 +1,7 @@
 package nl.b3p.featureapi.helpers;
 
 import nl.b3p.featureapi.feature.FeatureHelper;
+import nl.b3p.featureapi.repository.LayerRepo;
 import nl.b3p.featureapi.resource.Attribute;
 import nl.b3p.featureapi.resource.Feature;
 import nl.viewer.config.app.Application;
@@ -36,7 +37,7 @@ public class EditFeatureHelper {
     private static FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
 
     public static Feature update(ApplicationLayer appLayer, Layer layer, Feature feature, String fid,
-                                 EntityManager em, SimpleFeatureType sft, Application app) throws Exception {
+                                 EntityManager em, SimpleFeatureType sft, Application app, LayerRepo layerRepo) throws Exception {
         SimpleFeatureStore store = getDatastore(sft);
 
         Transaction transaction = new DefaultTransaction("edit");
@@ -99,7 +100,7 @@ public class EditFeatureHelper {
             store.modifyFeatures(attributes.toArray(new String[]{}), values.toArray(), filter);
 
             transaction.commit();
-            feature = getFeature(fid, store, appLayer, sft, em, app);
+            feature = getFeature(fid, store, appLayer, sft, em, app, layerRepo);
         } catch (Exception e) {
             log.error("Cannot update: ", e);
             transaction.rollback();
@@ -136,7 +137,7 @@ public class EditFeatureHelper {
     }
 
     public static Feature save(ApplicationLayer appLayer, EntityManager em, Feature feature,
-                               SimpleFeatureType sft, Application app) throws Exception {
+                               SimpleFeatureType sft, Application app, LayerRepo layerRepo) throws Exception {
         SimpleFeatureStore store = getDatastore(appLayer, em);
 
         SimpleFeature f = DataUtilities.template(store.getSchema());
@@ -184,7 +185,7 @@ public class EditFeatureHelper {
 
             transaction.commit();
             String id =ids.get(0).getID();
-            Feature saved = getFeature(id, store, appLayer,sft,em, app);
+            Feature saved = getFeature(id, store, appLayer,sft,em, app, layerRepo);
             return saved;
         } catch (Exception e) {
             transaction.rollback();
@@ -195,10 +196,10 @@ public class EditFeatureHelper {
     }
 
     public static Feature getFeature(String fid, SimpleFeatureStore store, ApplicationLayer appLayer,
-                                     SimpleFeatureType sft, EntityManager em, Application app) throws Exception {
+                                     SimpleFeatureType sft, EntityManager em, Application app, LayerRepo layerRepo) throws Exception {
         Filter f = ff.id(ff.featureId(fid));
         Query q = new Query(store.getSchema().getTypeName(),f);
-        List<Feature> features = FeatureHelper.getFeatures(appLayer,sft,store,q,null, null, em, app);
+        List<Feature> features = FeatureHelper.getFeatures(appLayer,sft,store,q,null, null, em, app, layerRepo);
         return features.get(0);
     }
 
