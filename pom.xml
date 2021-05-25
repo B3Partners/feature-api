@@ -14,6 +14,12 @@
     <packaging>war</packaging>
     <name>feature-api</name>
     <description>Endpoint for features used in tailormap</description>
+    <scm>
+        <connection>scm:git:git@github.com:B3Partners/feature-api.git</connection>
+        <developerConnection>scm:git:git@github.com:B3Partners/feature-api.git</developerConnection>
+        <url>https://github.com/B3Partners/feature-api.git</url>
+        <tag>HEAD</tag>
+    </scm>
     <properties>
         <java.version>11</java.version>
         <geotools.version>25.0</geotools.version>

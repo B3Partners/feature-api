@@ -298,8 +298,11 @@ components:
           type: string
           enum:
           - LINESTRING
+          - MULTILINESTRING
           - POINT
+          - MULTIPOINT
           - POLYGON
+          - MULTIPOLYGON
           - GEOMETRY
     Attribuut:
       type: object
