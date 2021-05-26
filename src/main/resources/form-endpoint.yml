@@ -271,11 +271,11 @@ components:
             $ref: '#/components/schemas/Feature'
         defaultGeometry:
           type: string
+        defaultGeometryField:
+          type: string
         fid:
           type: string
         objecttype:
-          type: string
-        defaultGeometryField:
           type: string
     Relation:
       type: object
