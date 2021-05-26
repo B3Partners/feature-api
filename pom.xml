@@ -9,7 +9,7 @@
     </parent>
     <groupId>nl.b3p</groupId>
     <artifactId>feature-api</artifactId>
-    <version>5.9.4</version>
+    <version>5.9.5-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>feature-api</name>
     <description>Endpoint for features used in tailormap</description>
@@ -17,7 +17,7 @@
         <connection>scm:git:git@github.com:B3Partners/feature-api.git</connection>
         <developerConnection>scm:git:git@github.com:B3Partners/feature-api.git</developerConnection>
         <url>https://github.com/B3Partners/feature-api.git</url>
-        <tag>v5.9.4</tag>
+        <tag>HEAD</tag>
     </scm>
     <properties>
         <java.version>11</java.version>
