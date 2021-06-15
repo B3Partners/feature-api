@@ -243,24 +243,11 @@ paths:
                   $ref: '#/components/schemas/Attribuut'
 components:
   schemas:
-    Attribute:
-      type: object
-      properties:
-        type:
-          type: string
-        key:
-          type: string
-        value:
-          type: object
     Feature:
       type: object
       properties:
         clazz:
           type: string
-        attributes:
-          type: array
-          items:
-            $ref: '#/components/schemas/Attribute'
         relations:
           type: array
           items:
@@ -269,14 +256,27 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Feature'
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Field'
         defaultGeometry:
-          type: string
-        defaultGeometryField:
           type: string
         fid:
           type: string
         objecttype:
           type: string
+        defaultGeometryField:
+          type: string
+    Field:
+      type: object
+      properties:
+        type:
+          type: string
+        key:
+          type: string
+        value:
+          type: object
     Relation:
       type: object
       properties:

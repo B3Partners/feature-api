@@ -1,11 +1,11 @@
 package nl.b3p.featureapi.resource;
 
-public class Attribute {
+public class Field {
     private String type;
     private String key;
     private Object value;
 
-    public Attribute(String key, Object value, String type) {
+    public Field(String key, Object value, String type) {
         this.key = key;
         this.value = value;
         this.type = type;

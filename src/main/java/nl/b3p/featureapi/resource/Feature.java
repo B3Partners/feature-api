@@ -8,16 +8,16 @@ public class Feature {
     public static final String FID = "__fid";
 
     protected String clazz = null;
-    protected List<Attribute> attributes = new ArrayList<>();
+    protected List<Field> featureAttributes = new ArrayList<>();
     protected List<Relation> relations = new ArrayList<>();
     protected List<Feature> children = new ArrayList<>();
 
 
     public String getFID(){
-        return attributes.stream().filter(attribute -> attribute.getKey().equals(FID)).findFirst().orElseThrow().getValue().toString();
+        return featureAttributes.stream().filter(featureAttribute -> featureAttribute.getKey().equals(FID)).findFirst().orElseThrow().getValue().toString();
     }
     public void put(String key, Object value, String type){
-        attributes.add(new Attribute(key, value, type));
+        featureAttributes.add(new Field(key, value, type));
     }
 
     public void setClazz(String clazz){
@@ -33,8 +33,8 @@ public class Feature {
     }
 
     public void joinAttributes(Feature other){
-        other.getAttributes().forEach(attribute -> {
-            getAttributes().add(attribute);
+        other.getAttributes().forEach(featureAttribute -> {
+            getAttributes().add(featureAttribute);
         });
     }
     public List<Relation> getRelations(){
@@ -43,20 +43,20 @@ public class Feature {
     public List<Feature> getChildren(){
         return children;
     }
-    public List<Attribute> getAttributes(){
-        return attributes;
+    public List<Field> getAttributes(){
+        return featureAttributes;
     }
 
     public String getDefaultGeometry(){
-        Optional<Attribute> opt =  attributes.stream().filter(attribute -> {
-            Optional<GeometryType> gt = GeometryType.fromValue(attribute.getType());
+        Optional<Field> opt =  featureAttributes.stream().filter(featureAttribute -> {
+            Optional<GeometryType> gt = GeometryType.fromValue(featureAttribute.getType());
             return gt.isPresent() ;
         }).findFirst();
         return opt.isPresent() ? (String) opt.get().getValue() : null;
     }
     public String getDefaultGeometryField(){
-        Optional<Attribute> opt =  attributes.stream().filter(attribute -> {
-            Optional<GeometryType> gt = GeometryType.fromValue(attribute.getType());
+        Optional<Field> opt =  featureAttributes.stream().filter(featureAttribute -> {
+            Optional<GeometryType> gt = GeometryType.fromValue(featureAttribute.getType());
             return gt.isPresent() ;
         }).findFirst();
         return opt.isPresent() ? opt.get().getKey() : null;
