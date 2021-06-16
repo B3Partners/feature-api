@@ -246,9 +246,9 @@ components:
     Feature:
       type: object
       properties:
-        layername:
+        layerName:
           type: string
-        tablename:
+        tableName:
           type: string
         relations:
           type: array

@@ -108,8 +108,8 @@ public class FeatureHelper {
         Feature j = new Feature();
         String typename = ft.getTypeName();
 
-        j.setTablename(getTypename(typename, al, app, em, layerRepo));
-        j.setLayername(al.getLayerName());
+        j.setTableName(getTypename(typename, al, app, em, layerRepo));
+        j.setLayerName(al.getLayerName());
 
         for (String name : propertyNames) {
             Object value = f.getAttribute(name);

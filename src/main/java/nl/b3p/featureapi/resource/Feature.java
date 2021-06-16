@@ -7,8 +7,8 @@ import java.util.Optional;
 public class Feature {
     public static final String FID = "__fid";
 
-    protected String layername = null;
-    protected String tablename = null;
+    protected String layerName = null;
+    protected String tableName = null;
     protected List<Field> featureAttributes = new ArrayList<>();
     protected List<Relation> relations = new ArrayList<>();
     protected List<Feature> children = new ArrayList<>();
@@ -53,19 +53,19 @@ public class Feature {
         return opt.isPresent() ? opt.get().getKey() : null;
     }
 
-    public String getLayername() {
-        return layername;
+    public String getLayerName() {
+        return layerName;
     }
 
-    public void setLayername(String layername) {
-        this.layername = layername;
+    public void setLayerName(String layerName) {
+        this.layerName = layerName;
     }
 
-    public String getTablename() {
-        return tablename;
+    public String getTableName() {
+        return tableName;
     }
 
-    public void setTablename(String tablename) {
-        this.tablename = tablename;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }
