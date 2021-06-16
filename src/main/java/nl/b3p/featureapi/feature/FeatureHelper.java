@@ -108,7 +108,8 @@ public class FeatureHelper {
         Feature j = new Feature();
         String typename = ft.getTypeName();
 
-        j.setClazz(getTypename(typename, al, app, em, layerRepo));
+        j.setTablename(getTypename(typename, al, app, em, layerRepo));
+        j.setLayername(al.getLayerName());
 
         for (String name : propertyNames) {
             Object value = f.getAttribute(name);
@@ -141,7 +142,7 @@ public class FeatureHelper {
             ApplicationLayer applicationLayer = UserLayerHelper.getOriginalFromUserLayer(layer, all, true, layerRepo);
             typename = applicationLayer.getLayerName();
         }
-        typename = stripNamespace(typename);
+        //typename = stripNamespace(typename);
         return typename;
     }
 

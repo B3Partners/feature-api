@@ -246,7 +246,9 @@ components:
     Feature:
       type: object
       properties:
-        clazz:
+        layername:
+          type: string
+        tablename:
           type: string
         relations:
           type: array
@@ -263,8 +265,6 @@ components:
         defaultGeometry:
           type: string
         fid:
-          type: string
-        objecttype:
           type: string
         defaultGeometryField:
           type: string

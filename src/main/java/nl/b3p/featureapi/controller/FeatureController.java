@@ -286,10 +286,19 @@ public class FeatureController {
         boolean inNonNamespaced = false;
         if(index != -1 ){
             String nonNameSpaced =FeatureHelper.stripNamespace(origName);
-            inNonNamespaced = featureTypes.contains(nonNameSpaced);
+            inNonNamespaced = itemInList(nonNameSpaced, featureTypes);
         }
 
-        return featureTypes.contains(origName) || inNonNamespaced;
+        return itemInList(origName, featureTypes) || inNonNamespaced;
+    }
+
+    private boolean itemInList(String item, List<String> list){
+        for (String st: list) {
+            if(st.equals(item) || FeatureHelper.stripNamespace(st).equals(item)){
+                return true;
+            }
+        }
+        return false;
     }
 
 }
