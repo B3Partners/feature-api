@@ -43,10 +43,7 @@ public class FeatureSourceFactoryHelper {
     }
 
     private static boolean isSimpleFeatureTypeTypename(String name, SimpleFeatureType sft){
-        return  FeatureHelper.stripGBIName(name).equals(sft.getTypeName())
-                || name.equals(sft.getTypeName())
-                || name.equals(FeatureHelper.stripGBIName(sft.getTypeName()))
-                || FeatureHelper.stripGBIName(name).equals(FeatureHelper.stripGBIName(sft.getTypeName()));
+        return  name.equals(sft.getTypeName());
     }
 
     public static FeatureSource getFeatureSource(SimpleFeatureType sft) throws Exception {

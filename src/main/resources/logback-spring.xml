@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOGS" value="${catalina.base}/logs" />
+    <property name="LOGS" value="${catalina.base}/logs"/>
     <timestamp key="startTimestamp" datePattern="yyyyMMddHHmmssSSS"/>
 
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
@@ -31,7 +31,7 @@
     <!-- LOG everything at INFO level -->
     <root level="info">
         <appender-ref ref="RollingFile"/>
-        <appender-ref ref="Console" />
+        <appender-ref ref="Console"/>
     </root>
 
-   </configuration>
+</configuration>

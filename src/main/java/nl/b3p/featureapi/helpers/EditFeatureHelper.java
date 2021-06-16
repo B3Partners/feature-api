@@ -2,13 +2,12 @@ package nl.b3p.featureapi.helpers;
 
 import nl.b3p.featureapi.feature.FeatureHelper;
 import nl.b3p.featureapi.repository.LayerRepo;
-import nl.b3p.featureapi.resource.Attribute;
+import nl.b3p.featureapi.resource.Field;
 import nl.b3p.featureapi.resource.Feature;
 import nl.viewer.config.app.Application;
 import nl.viewer.config.app.ApplicationLayer;
 import nl.viewer.config.services.Layer;
 import nl.viewer.config.services.SimpleFeatureType;
-import org.apache.commons.lang3.StringUtils;
 import org.geotools.data.*;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
@@ -24,9 +23,7 @@ import org.opengis.filter.identity.FeatureId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -48,7 +45,7 @@ public class EditFeatureHelper {
 
         List<String> attributes = new ArrayList<String>();
         List values = new ArrayList();
-        for (Attribute attr: feature.getAttributes()) {
+        for (Field attr: feature.getAttributes()) {
 
 
             String attribute = attr.getKey();
@@ -90,7 +87,7 @@ public class EditFeatureHelper {
             }
         }
 
-        log.debug(String.format("Modifying feature source #%d fid=%s, attributes=%s, values=%s",
+        log.error(String.format("Modifying feature source #%d fid=%s, attributes=%s, values=%s",
                 layer.getFeatureType().getId(),
                 fid,
                 attributes.toString(),
@@ -205,7 +202,7 @@ public class EditFeatureHelper {
 
     private static Map<String, Object> featureToMap(Feature feature){
         Map<String, Object> attrs = new HashMap<>();
-        for (Attribute attr: feature.getAttributes()) {
+        for (Field attr: feature.getAttributes()) {
             attrs.put(attr.getKey(), attr.getValue());
         }
         return attrs;

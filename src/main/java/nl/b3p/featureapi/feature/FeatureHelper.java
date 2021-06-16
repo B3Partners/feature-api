@@ -31,7 +31,6 @@ import java.util.*;
 public class FeatureHelper {
     private static final Log log = LogFactory.getLog(FeatureHelper.class);
     public static final int MAX_FEATURES = 1000;
-    public static final String GBI_PREFIX = "gb_";
     public final static String USERLAYER_SEPARATOR = "ul_";
 
     public static List<Feature> getFeatures(ApplicationLayer al, SimpleFeatureType ft, FeatureSource fs, Query q,
@@ -142,7 +141,7 @@ public class FeatureHelper {
             ApplicationLayer applicationLayer = UserLayerHelper.getOriginalFromUserLayer(layer, all, true, layerRepo);
             typename = applicationLayer.getLayerName();
         }
-        typename = stripGBIName(typename);
+        typename = stripNamespace(typename);
         return typename;
     }
 
@@ -307,13 +306,11 @@ public class FeatureHelper {
         FilterHelper.setSortBy(q, sortAttribute, dir);
     }
 
-    public static String stripGBIName(String name){
+    public static String stripNamespace(String name){
         if(name.contains(":")) {
             name = name.substring(name.indexOf(":") + 1);
         }
-        if(name.contains(GBI_PREFIX)){
-            name = name.substring(name.indexOf(GBI_PREFIX) + GBI_PREFIX.length());
-        }
+
         return name;
     }
 }

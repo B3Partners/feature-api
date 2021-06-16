@@ -56,7 +56,7 @@ public class FeatureController {
 
     @GetMapping(value = "/{application}/{x}/{y}/{scale}")
     public List<Feature> onPoint(@PathVariable Long application, @PathVariable double x,
-                                            @PathVariable double y, @PathVariable double scale)  throws Exception {
+                                 @PathVariable double y, @PathVariable double scale) throws Exception {
 
         Application app = appRepo.findById(application).orElseThrow();
         Application.TreeCache tc = app.loadTreeCache(this.em);
@@ -73,10 +73,11 @@ public class FeatureController {
         });
         return features;
     }
+
     @GetMapping(value = "/{application}/{featureTypes}/{x}/{y}/{scale}")
     public List<Feature> featuretypeOnPoint(@PathVariable Long application, @PathVariable List<String> featureTypes,
                                             @PathVariable double x,
-                                            @PathVariable double y, @PathVariable double scale)  throws Exception {
+                                            @PathVariable double y, @PathVariable double scale) throws Exception {
         List<ApplicationLayer> applicationLayers = getApplayers(featureTypes, application, false);
         Application app = appRepo.findById(application).orElseThrow();
         List<Feature> features = new ArrayList<>();
@@ -139,10 +140,10 @@ public class FeatureController {
 
     @PostMapping("/{application}/{featuretype}")
     public Feature save(@RequestBody Feature f, @RequestParam(required = false) String parentId,
-                        @PathVariable Long application,@PathVariable String featuretype) throws Exception {
+                        @PathVariable Long application, @PathVariable String featuretype) throws Exception {
         List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application, true);
 
-        if (applicationLayers.isEmpty() ) {
+        if (applicationLayers.isEmpty()) {
             throw new IllegalArgumentException("Featuretype has no applayer in db");
         }
         ApplicationLayer appLayer = applicationLayers.get(0);
@@ -165,7 +166,7 @@ public class FeatureController {
 
         List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application, true);
 
-        if (applicationLayers.isEmpty() ) {
+        if (applicationLayers.isEmpty()) {
             throw new IllegalArgumentException("Featuretype has no applayers configured in DB");
         }
         ApplicationLayer appLayer = applicationLayers.get(0);
@@ -184,10 +185,10 @@ public class FeatureController {
 
     @DeleteMapping("/{application}/{featuretype}/{fid}")
     public boolean delete(@PathVariable Long application, @PathVariable String featuretype,
-                       @PathVariable String fid) throws Exception {
+                          @PathVariable String fid) throws Exception {
         List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application, true);
 
-        if (applicationLayers.isEmpty() ) {
+        if (applicationLayers.isEmpty()) {
             throw new IllegalArgumentException("Featuretype has no applayers configured in DB");
         }
         ApplicationLayer appLayer = applicationLayers.get(0);
@@ -196,10 +197,10 @@ public class FeatureController {
         if (layer.getFeatureType() == null) {
             throw new IllegalArgumentException("Layer has no featuretype configured");
         }
-        try{
+        try {
             EditFeatureHelper.deleteFeature(appLayer, em, fid);
             return true;
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("Cannot remove feature: ", e);
             return false;
         }
@@ -214,11 +215,10 @@ public class FeatureController {
         appLayers.forEach(al -> {
             FeaturetypeMetadata fm = new FeaturetypeMetadata();
             Layer l = getLayer(al);
-            if(l !=null && l.getFeatureType() != null){
-                SimpleFeatureType sft =l.getFeatureType();
+            if (l != null && l.getFeatureType() != null) {
+                SimpleFeatureType sft = l.getFeatureType();
                 String featureTypeName = sft.getTypeName();
-                String processedFTName = FeatureHelper.stripGBIName(featureTypeName);
-                fm.featuretypeName =processedFTName;
+                fm.featuretypeName = featureTypeName;
                 fm.geometryAttribute = sft.getGeometryAttribute();
                 fm.geometryType = GeometryType.fromValue(sft.getAttribute(fm.geometryAttribute).getType()).orElse(GeometryType.GEOMETRY);
                 md.add(fm);
@@ -227,11 +227,8 @@ public class FeatureController {
         return md;
     }
 
-    private Layer getLayer(ApplicationLayer al){
-        Layer l =  al.getService().getLayer(al.getLayerName(), em);
-        if( l== null){//this check must/can be removed if the layername isn't changed by the frontend and passport converter anymore
-            l =  al.getService().getLayer(FeatureHelper.GBI_PREFIX+al.getLayerName(), em);
-        }
+    private Layer getLayer(ApplicationLayer al) {
+        Layer l = al.getService().getLayer(al.getLayerName(), em);
         return l;
     }
 
@@ -245,14 +242,14 @@ public class FeatureController {
         return appLayers;
     }
 
-    private List<ApplicationLayer> filterAppLayers(List<String> featureTypes,List<ApplicationLayer> all){
+    private List<ApplicationLayer> filterAppLayers(List<String> featureTypes, List<ApplicationLayer> all) {
         all = filterAppLayers(all);
         List<ApplicationLayer> appLayers = all.stream().filter(applicationLayer ->
                 appLayerInFeatureTypes(applicationLayer, featureTypes)).collect(Collectors.toList());
         return appLayers;
     }
 
-    private List<ApplicationLayer> filterAppLayers(List<ApplicationLayer> all){
+    private List<ApplicationLayer> filterAppLayers(List<ApplicationLayer> all) {
         List<ApplicationLayer> appLayers = all.stream().filter(applicationLayer -> {
             Layer l = applicationLayer.getService().getLayer(applicationLayer.getLayerName(), em);
             return l != null && l.getFeatureType() != null;
@@ -260,44 +257,39 @@ public class FeatureController {
         return appLayers;
     }
 
-   //this method must/can be removed if the layername isn't changed by the frontend and passport converter anymore
-    private boolean appLayerInFeatureTypes(ApplicationLayer al, List<String> featureTypes){
+    //this method must/can be removed if the layername isn't changed by the frontend and passport converter anymore
+    private boolean appLayerInFeatureTypes(ApplicationLayer al, List<String> featureTypes) {
         String origName = al.getLayerName();
-
-        List<String> sanitizedFTs = featureTypes.stream().map(s -> sanitizeName(s)).collect(Collectors.toList());
 
         Layer l = getLayer(al);
 
         SimpleFeatureType sft = l.getFeatureType();
-        return appLayerInFeatureTypes(sft, featureTypes, sanitizedFTs);
+        return appLayerInFeatureTypes(sft, featureTypes);
     }
 
-    private boolean appLayerInFeatureTypes(SimpleFeatureType sft, List<String> featureTypes,List<String> sanitizedFTs) {
-        if(appLayerInFeatureTypes(sft.getTypeName(), featureTypes, sanitizedFTs)){
+    private boolean appLayerInFeatureTypes(SimpleFeatureType sft, List<String> featureTypes) {
+        if (appLayerInFeatureTypes(sft.getTypeName(), featureTypes)) {
             return true;
         }
 
         List<SimpleFeatureType> sfts = sft.getRelations().stream().map(featureTypeRelation -> featureTypeRelation.getForeignFeatureType()).collect(Collectors.toList());
-        for (SimpleFeatureType type: sfts) {
-            if(appLayerInFeatureTypes(type,featureTypes, sanitizedFTs)){
+        for (SimpleFeatureType type : sfts) {
+            if (appLayerInFeatureTypes(type, featureTypes)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean appLayerInFeatureTypes(String origName, List<String> featureTypes,List<String> sanitizedFTs) {
-        if(origName.contains(FeatureHelper.GBI_PREFIX)){
-            String strippedGbiName = FeatureHelper.stripGBIName(origName);
-            strippedGbiName = sanitizeName(strippedGbiName);
-            return featureTypes.contains(strippedGbiName) || sanitizedFTs.contains(origName);
-
-        }else{
-            return  sanitizedFTs.contains(origName) || sanitizedFTs.contains(sanitizeName(origName));
+    private boolean appLayerInFeatureTypes(String origName, List<String> featureTypes) {
+        int index = origName.indexOf(":");
+        boolean inNonNamespaced = false;
+        if(index != -1 ){
+            String nonNameSpaced =FeatureHelper.stripNamespace(origName);
+            inNonNamespaced = featureTypes.contains(nonNameSpaced);
         }
+
+        return featureTypes.contains(origName) || inNonNamespaced;
     }
 
-        private String sanitizeName(String name){
-        return name.replaceAll("_", "");
-    }
 }
