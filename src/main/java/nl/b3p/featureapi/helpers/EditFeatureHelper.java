@@ -135,7 +135,7 @@ public class EditFeatureHelper {
 
     public static Feature save(ApplicationLayer appLayer, EntityManager em, Feature feature,
                                SimpleFeatureType sft, Application app, LayerRepo layerRepo) throws Exception {
-        SimpleFeatureStore store = getDatastore(appLayer, em);
+        SimpleFeatureStore store = getDatastore(sft);
 
         SimpleFeature f = DataUtilities.template(store.getSchema());
 
