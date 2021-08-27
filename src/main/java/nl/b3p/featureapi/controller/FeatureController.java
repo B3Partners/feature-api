@@ -197,8 +197,11 @@ public class FeatureController {
         if (layer.getFeatureType() == null) {
             throw new IllegalArgumentException("Layer has no featuretype configured");
         }
+
+        SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featuretype);
+
         try {
-            EditFeatureHelper.deleteFeature(appLayer, em, fid);
+            EditFeatureHelper.deleteFeature(appLayer, em, fid, sft);
             return true;
         } catch (Exception e) {
             log.error("Cannot remove feature: ", e);

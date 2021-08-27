@@ -112,8 +112,8 @@ public class EditFeatureHelper {
     }
 
 
-    public static boolean deleteFeature(ApplicationLayer appLayer, EntityManager em, String fid) throws Exception {
-        SimpleFeatureStore store = getDatastore(appLayer, em);
+    public static boolean deleteFeature(ApplicationLayer appLayer, EntityManager em, String fid, SimpleFeatureType sft) throws Exception {
+        SimpleFeatureStore store = getDatastore(sft);
 
         Transaction transaction = new DefaultTransaction("edit");
         store.setTransaction(transaction);
