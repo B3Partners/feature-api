@@ -37,9 +37,8 @@ public class UserLayerHelper {
 
     public static ApplicationLayer getOriginalFromUserLayer(String featureType, List<ApplicationLayer> all, boolean forWriting, LayerRepo layerRepo){
         if(featureType.contains(FeatureHelper.USERLAYER_SEPARATOR)){
-            String layerId = featureType.substring(FeatureHelper.USERLAYER_SEPARATOR.length());
-            Layer l = layerRepo.findById(Long.parseLong(layerId)).orElse(null);
-            if(l!=null){
+            Layer l = layerRepo.findByNameAndUserlayer(featureType, true);
+            if(l != null){
                 return getOriginalFromUserLayer(l, all, forWriting, layerRepo);
             }else{
                 return null;
