@@ -17,6 +17,7 @@ import nl.viewer.config.services.SimpleFeatureType;
 import org.geotools.data.*;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureIterator;
+import org.geotools.filter.identity.FeatureIdImpl;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.util.GeometricShapeFactory;
@@ -86,6 +87,32 @@ public class FeatureController {
                 features.addAll(getFeatures(app, appLayer, x, y, scale));
             } catch (Exception e) {
                 log.error("cannot get features for applayer " + appLayer.getLayerName(), e);
+            }
+        });
+        return features;
+    }
+
+    @GetMapping(value = "/{application}/{featureType}/{featureIds}")
+    public List<Feature> getFeaturesForIds(@PathVariable Long application, @PathVariable String featureType,
+                                 @PathVariable List<String> featureIds) throws Exception {
+        List<String> featureTypes = new ArrayList<>();
+        featureTypes.add(featureType);
+        List<ApplicationLayer> applicationLayers = getApplayers(featureTypes, application, false);
+        Application app = appRepo.findById(application).orElseThrow();
+        List<Feature> features = new ArrayList<>();
+        applicationLayers.forEach(appLayer -> {
+            try {
+                Layer layer = appLayer.getService().getLayer(appLayer.getLayerName(), em);
+                SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featureType);
+                FeatureSource fs = FeatureSourceFactoryHelper.getFeatureSource(sft);
+                Query q = new Query(sft.getTypeName());
+                FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
+                List<Filter> featureIdFilterList = featureIds.stream().map(fid -> ff.id(new FeatureIdImpl(fid))).collect(Collectors.toList());
+                Filter filter = ff.or(featureIdFilterList);
+                q.setFilter(filter);
+                features.addAll(FeatureHelper.getFeatures(appLayer, sft, fs, q, null, null, em, app, layerRepo));
+            } catch (Exception e) {
+                log.error("cannot get features for featuretype " + featureType, e);
             }
         });
         return features;

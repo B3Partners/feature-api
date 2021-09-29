@@ -189,6 +189,39 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Feature'
+  /features/{application}/{featureType}/{featureIds}:
+    get:
+      tags:
+        - feature-controller
+      operationId: getFeaturesForIds
+      parameters:
+        - name: application
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: featureType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: featureIds
+          in: path
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feature'
   /features/info/{appId}/{featureTypes}:
     get:
       tags:
