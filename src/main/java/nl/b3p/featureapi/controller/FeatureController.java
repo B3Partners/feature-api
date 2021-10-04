@@ -92,9 +92,9 @@ public class FeatureController {
         return features;
     }
 
-    @GetMapping(value = "/{application}/{featureType}/{featureIds}")
+    @PostMapping(value = "/by-id/{application}/{featureType}")
     public List<Feature> getFeaturesForIds(@PathVariable Long application, @PathVariable String featureType,
-                                 @PathVariable List<String> featureIds) throws Exception {
+                                 @RequestBody List<String> featureIds) throws Exception {
         List<String> featureTypes = new ArrayList<>();
         featureTypes.add(featureType);
         List<ApplicationLayer> applicationLayers = getApplayers(featureTypes, application, false);

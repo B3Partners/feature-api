@@ -189,8 +189,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Feature'
-  /features/{application}/{featureType}/{featureIds}:
-    get:
+  /features/by-id/{application}/{featureType}:
+    post:
       tags:
         - feature-controller
       operationId: getFeaturesForIds
@@ -206,13 +206,13 @@ paths:
           required: true
           schema:
             type: string
-        - name: featureIds
-          in: path
-          required: true
-          schema:
-            type: array
-            items:
-              type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
       responses:
         "200":
           description: OK
