@@ -174,11 +174,16 @@ public class FeatureController {
         if (applicationLayers.isEmpty()) {
             throw new IllegalArgumentException("Featuretype has no applayer in db");
         }
-        ApplicationLayer appLayer = applicationLayers.get(0);
+
+        ApplicationLayer appLayer = null;
         for (ApplicationLayer layer: applicationLayers) {
             if(!getLayer(layer).isUserlayer()) {
                 appLayer = layer;
             }
+        }
+
+        if (appLayer == null) {
+            throw new IllegalArgumentException("No original layer found");
         }
 
         Layer layer = getLayer(appLayer);
