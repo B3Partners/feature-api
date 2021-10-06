@@ -12,6 +12,7 @@ import nl.b3p.featureapi.resource.FeaturetypeMetadata;
 import nl.b3p.featureapi.resource.GeometryType;
 import nl.viewer.config.app.Application;
 import nl.viewer.config.app.ApplicationLayer;
+import nl.viewer.config.services.FeatureTypeRelation;
 import nl.viewer.config.services.Layer;
 import nl.viewer.config.services.SimpleFeatureType;
 import org.geotools.data.*;
@@ -173,7 +174,17 @@ public class FeatureController {
         if (applicationLayers.isEmpty()) {
             throw new IllegalArgumentException("Featuretype has no applayer in db");
         }
-        ApplicationLayer appLayer = applicationLayers.get(0);
+
+        ApplicationLayer appLayer = null;
+        for (ApplicationLayer layer: applicationLayers) {
+            if(!getLayer(layer).isUserlayer()) {
+                appLayer = layer;
+            }
+        }
+
+        if (appLayer == null) {
+            throw new IllegalArgumentException("No original layer found");
+        }
 
         Layer layer = getLayer(appLayer);
         if (layer.getFeatureType() == null) {
@@ -181,6 +192,10 @@ public class FeatureController {
         }
 
         SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featuretype);
+        if (!parentId.equals("-1")) {
+            FeatureTypeRelation rel = FeatureSourceFactoryHelper.getParentRelation(layer.getFeatureType(), featuretype, null);
+            f.put(rel.getRelationKeys().get(0).getRightSide().getName(), parentId, rel.getRelationKeys().get(0).getRightSide().getType());
+        }
         Application app = this.appRepo.findById(application).orElseThrow();
         Feature savedFeature = EditFeatureHelper.save(appLayer, em, f, sft, app, layerRepo);
 
