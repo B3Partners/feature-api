@@ -1,11 +1,7 @@
 package nl.b3p.featureapi.helpers;
 
-import nl.b3p.featureapi.feature.FeatureHelper;
 import nl.geotools.data.arcgis.ArcGISDataStoreFactory;
-import nl.viewer.config.services.FeatureTypeRelation;
-import nl.viewer.config.services.JDBCFeatureSource;
-import nl.viewer.config.services.Layer;
-import nl.viewer.config.services.SimpleFeatureType;
+import nl.viewer.config.services.*;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
@@ -36,6 +32,20 @@ public class FeatureSourceFactoryHelper {
                 SimpleFeatureType test = getSimpleFeatureType(rel.getForeignFeatureType(), typename);
                 if(test != null){
                     return test;
+                }
+            }
+            return null;
+        }
+    }
+
+    public static FeatureTypeRelation getParentRelation(SimpleFeatureType sft, String typename, FeatureTypeRelation parentRel){
+        if(isSimpleFeatureTypeTypename(typename, sft)){
+            return parentRel;
+        }else{
+            for(FeatureTypeRelation rel : sft.getRelations()){
+                FeatureTypeRelation finalParentRel = getParentRelation(rel.getForeignFeatureType(), typename, rel);
+                if(finalParentRel != null){
+                    return finalParentRel;
                 }
             }
             return null;
