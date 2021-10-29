@@ -55,9 +55,6 @@ public class EditFeatureHelper {
 
                 if (ad != null) {
                     Object value = attr.getValue();
-                    if(value instanceof String && value.equals("")){
-                        value = null;
-                    }
                     if(value!= null) {
                         if (!isAttributeUserEditingDisabled(attribute, appLayer, layer, sft)) {
 
