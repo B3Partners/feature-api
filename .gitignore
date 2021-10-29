@@ -23,6 +23,7 @@ buildNumber.properties
 .springBeans
 .sts4-cache
 
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -36,6 +37,7 @@ buildNumber.properties
 /nbdist/
 /.nb-gradle/
 build/
+/catalina*
 !**/src/main/**/build/
 !**/src/test/**/build/
 
