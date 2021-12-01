@@ -1,12 +1,16 @@
 package nl.b3p.featureapi.helpers;
 
+import nl.b3p.featureapi.resource.TailormapCQL;
 import nl.viewer.config.services.AttributeDescriptor;
 import nl.viewer.config.services.FeatureTypeRelation;
 import nl.viewer.config.services.FeatureTypeRelationKey;
 import nl.viewer.config.services.SimpleFeatureType;
 import org.geotools.data.Query;
+import org.geotools.data.jdbc.FilterToSQLException;
 import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.visitor.SimplifyingFilterVisitor;
+import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.util.factory.GeoTools;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
@@ -14,6 +18,8 @@ import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.sort.SortBy;
 import org.opengis.filter.sort.SortOrder;
 
+import javax.persistence.EntityManager;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,5 +107,11 @@ public class FilterHelper {
             });
         }
 
+    }
+
+    public static String getSQLQuery(JDBCDataStore dataStore, String tableName, EntityManager em, String filter) throws CQLException, FilterToSQLException, IOException {
+        TMFilterToSQL f = new TMFilterToSQL(dataStore, tableName);
+        f.createFilterCapabilities();
+        return f.encodeToString(TailormapCQL.toFilter(filter, em));
     }
 }
