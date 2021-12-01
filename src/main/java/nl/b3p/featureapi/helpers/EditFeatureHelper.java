@@ -12,6 +12,9 @@ import org.geotools.data.*;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.identity.FeatureIdImpl;
+import org.geotools.jdbc.JDBCDataStore;
+import org.geotools.jdbc.PrimaryKey;
+import org.json.JSONArray;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTReader;
 import org.opengis.feature.simple.SimpleFeature;
@@ -24,8 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
+import java.io.IOException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 public class EditFeatureHelper {
     private static Logger log = LoggerFactory.getLogger(EditFeatureHelper.class);
@@ -111,6 +117,41 @@ public class EditFeatureHelper {
         return feature;
     }
 
+    public static boolean updateBulk(SimpleFeatureType sft, EntityManager em, String filter, Map<String, String> updateFields) throws Exception {
+        SimpleFeatureStore store = getDatastore(sft);
+        if (store.getDataStore() instanceof JDBCDataStore) {
+            FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
+            JDBCDataStore da = (JDBCDataStore) store.getDataStore();
+            PrimaryKey pk = da.getPrimaryKey(store.getSchema());
+            if(pk.getColumns().size() > 1) {
+                throw new IllegalArgumentException("No support for multiple column primary key");
+            }
+            String pkColumn = pk.getColumns().get(0).getName();
+            String sqlWhere = "";
+            if(!filter.isEmpty()) {
+                sqlWhere = FilterHelper.getSQLQuery(da, sft.getTypeName(), em, filter);
+            }
+            List<String> attributes = new ArrayList<>();
+            List values = new ArrayList();
+            Filter finalFilter  = getFeaturesWithSQL(da, sft, sqlWhere, pkColumn, ff);
+            updateFields.forEach((k,v) -> {
+                if(!v.isEmpty()) {
+                    attributes.add(k);
+                    values.add(v);
+                }
+            });
+            try {
+                Transaction transaction = new DefaultTransaction("bulk");
+                store.setTransaction(transaction);
+
+                store.modifyFeatures(attributes.toArray(new String[]{}), values.toArray(), finalFilter);
+                transaction.commit();
+            } catch (Exception e) {
+                throw (e);
+            }
+        }
+         return true;
+    }
 
     public static boolean deleteFeature(ApplicationLayer appLayer, EntityManager em, String fid, SimpleFeatureType sft) throws Exception {
         SimpleFeatureStore store = getDatastore(sft);
@@ -247,5 +288,35 @@ public class EditFeatureHelper {
         FeatureSource ds = FeatureSourceFactoryHelper.getFeatureSource(sft);
         SimpleFeatureStore store =(SimpleFeatureStore) ds;
         return store;
+    }
+
+    private static Filter getFeaturesWithSQL(JDBCDataStore da, SimpleFeatureType ft, String sql, String pkColumn, FilterFactory2 ff) throws SQLException {
+        JSONArray features = new JSONArray();
+        Connection con = null;
+        Filter filter = null;
+        try {
+            con = da.getConnection(new DefaultTransaction("get-features"));
+            // Gebruik orginele laag naam om de PK('s) te vinden voor een user-layer
+            // Deze is nodig om een __FID te maken
+            String featureTypeName = ft.getTypeName();
+            PrimaryKey pk = da.getPrimaryKey(da.getSchema(featureTypeName));
+
+            PreparedStatement prep;
+            prep = con.prepareStatement("SELECT " + pkColumn + " FROM " + ft.getTypeName() + " " + sql);
+            ResultSet rs = prep.executeQuery();
+            Set<FeatureId> fids = new HashSet<FeatureId>();
+            while(rs.next()) {
+                String s = rs.getObject(pkColumn).toString();
+                fids.add(ff.featureId(s));
+            }
+            filter = ff.id(fids);
+        } catch (IOException | SQLException e) {
+            log.error("Can't get features with sql for JDBCDatastore: " + e.getMessage());
+        } finally {
+            if (con != null) {
+                con.close();
+            }
+        }
+        return filter;
     }
 }
