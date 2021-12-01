@@ -7,6 +7,7 @@ import nl.b3p.featureapi.helpers.UserLayerHelper;
 import nl.b3p.featureapi.repository.ApplicationLayerRepo;
 import nl.b3p.featureapi.repository.ApplicationRepo;
 import nl.b3p.featureapi.repository.LayerRepo;
+import nl.b3p.featureapi.resource.BulkUpdateBody;
 import nl.b3p.featureapi.resource.Feature;
 import nl.b3p.featureapi.resource.FeaturetypeMetadata;
 import nl.b3p.featureapi.resource.GeometryType;
@@ -206,12 +207,7 @@ public class FeatureController {
     public Feature update(@PathVariable Long application, @PathVariable String featuretype,
                           @PathVariable String fid, @RequestBody Feature feature) throws Exception {
 
-        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application, true);
-
-        if (applicationLayers.isEmpty()) {
-            throw new IllegalArgumentException("Featuretype has no applayers configured in DB");
-        }
-        ApplicationLayer appLayer = applicationLayers.get(0);
+        ApplicationLayer appLayer = getAppLayer(featuretype, application);
         Application app = this.appRepo.findById(application).orElseThrow();
 
         Layer layer = getLayer(appLayer);
@@ -223,6 +219,19 @@ public class FeatureController {
 
         feature = EditFeatureHelper.update(appLayer, layer, feature, fid, em, sft, app, layerRepo);
         return feature;
+    }
+
+    @PutMapping("/updatebulk/{application}/{featureType}")
+    public boolean updateBulk(@PathVariable Long application, @PathVariable String featureType,
+                          @RequestBody BulkUpdateBody bulkBody) throws Exception {
+        String filter = bulkBody.getFilter();
+        ApplicationLayer appLayer = getAppLayer(featureType, application);
+        Layer layer = getLayer(appLayer);
+        if (layer.getFeatureType() == null) {
+            throw new IllegalArgumentException("Layer has no featuretype configured");
+        }
+        SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featureType);
+        return EditFeatureHelper.updateBulk(sft, em, filter, bulkBody.getUpdatedFields());
     }
 
     @DeleteMapping("/{application}/{featuretype}/{fid}")
@@ -344,6 +353,15 @@ public class FeatureController {
             }
         }
         return false;
+    }
+
+    private ApplicationLayer getAppLayer(String featuretype, Long application) {
+        List<ApplicationLayer> applicationLayers = getApplayers(Collections.singletonList(featuretype), application, true);
+
+        if (applicationLayers.isEmpty()) {
+            throw new IllegalArgumentException("Featuretype has no applayers configured in DB");
+        }
+        return applicationLayers.get(0);
     }
 
 }
