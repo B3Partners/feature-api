@@ -1,9 +1,14 @@
 package nl.b3p.featureapi.resource;
 
 public class Relation {
+
     String filter;
     Long foreignFeatureTypeId;
     String foreignFeatureTypeName;
+    String columnName;
+    String columnType;
+    String foreignColumnName;
+    String foreignColumnType;
 
     public String getFilter() {
         return filter;
@@ -28,6 +33,39 @@ public class Relation {
     public void setForeignFeatureTypeName(String foreignFeatureTypeName) {
         this.foreignFeatureTypeName = foreignFeatureTypeName;
     }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
+
+    public String getColumnType() {
+        return columnType;
+    }
+
+    public void setColumnType(String columnType) {
+        this.columnType = columnType;
+    }
+
+    public String getForeignColumnName() {
+        return foreignColumnName;
+    }
+
+    public void setForeignColumnName(String foreignColumnName) {
+        this.foreignColumnName = foreignColumnName;
+    }
+
+    public String getForeignColumnType() {
+        return foreignColumnType;
+    }
+
+    public void setForeignColumnType(String foreignColumnType) {
+        this.foreignColumnType = foreignColumnType;
+    }
+
 }
 /*
    related_ft.put("filter", CQL.toCQL(filter));
