@@ -173,6 +173,13 @@ public class FeatureHelper {
                     r.setFilter(CQL.toCQL(filter));
                     r.setForeignFeatureTypeId(rel.getForeignFeatureType().getId());
                     r.setForeignFeatureTypeName(rel.getForeignFeatureType().getTypeName());
+                    try {
+                        FeatureTypeRelationKey relationKey = rel.getRelationKeys().get(0);
+                        r.setColumnName(relationKey.getLeftSide().getName());
+                        r.setColumnType(relationKey.getLeftSide().getType());
+                        r.setForeignColumnName(relationKey.getRightSide().getName());
+                        r.setForeignColumnType(relationKey.getRightSide().getType());
+                    } catch (IndexOutOfBoundsException ignored) {}
                     parent.getRelations().add(r);
                 }
                 foreignQ.setFilter(filter);
