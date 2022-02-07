@@ -132,7 +132,7 @@ public class EditFeatureHelper {
             List values = new ArrayList();
             Filter finalFilter  = getFeaturesWithSQL(da, sft, sqlWhere, pkColumn, ff);
             updateFields.forEach((k,v) -> {
-                if(!v.isEmpty()) {
+                if(v != null) {
                     attributes.add(k);
                     values.add(v);
                 }
