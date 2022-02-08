@@ -5,6 +5,8 @@ import java.util.Map;
 public class BulkUpdateBody {
     private String filter;
 
+    private boolean useSQLFiltering;
+
     private Map<String, String> updatedFields;
 
     public String getFilter() {
@@ -21,5 +23,13 @@ public class BulkUpdateBody {
 
     public void setUpdatedFields(Map<String, String> updatedFields) {
         this.updatedFields = updatedFields;
+    }
+
+    public boolean isUseSQLFiltering() {
+        return useSQLFiltering;
+    }
+
+    public void setUseSQLFiltering(boolean useSQLFiltering) {
+        this.useSQLFiltering = useSQLFiltering;
     }
 }
