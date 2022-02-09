@@ -225,13 +225,14 @@ public class FeatureController {
     public boolean updateBulk(@PathVariable Long application, @PathVariable String featureType,
                           @RequestBody BulkUpdateBody bulkBody) throws Exception {
         String filter = bulkBody.getFilter();
+        boolean useSQLFiltering = bulkBody.isUseSQLFiltering();
         ApplicationLayer appLayer = getAppLayer(featureType, application);
         Layer layer = getLayer(appLayer);
         if (layer.getFeatureType() == null) {
             throw new IllegalArgumentException("Layer has no featuretype configured");
         }
         SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featureType);
-        return EditFeatureHelper.updateBulk(sft, em, filter, bulkBody.getUpdatedFields());
+        return EditFeatureHelper.updateBulk(sft, em, filter, bulkBody.getUpdatedFields(), useSQLFiltering);
     }
 
     @DeleteMapping("/{application}/{featuretype}/{fid}")

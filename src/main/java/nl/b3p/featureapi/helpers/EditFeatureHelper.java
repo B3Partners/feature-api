@@ -4,6 +4,7 @@ import nl.b3p.featureapi.feature.FeatureHelper;
 import nl.b3p.featureapi.repository.LayerRepo;
 import nl.b3p.featureapi.resource.Field;
 import nl.b3p.featureapi.resource.Feature;
+import nl.b3p.featureapi.resource.TailormapCQL;
 import nl.viewer.config.app.Application;
 import nl.viewer.config.app.ApplicationLayer;
 import nl.viewer.config.services.Layer;
@@ -114,40 +115,45 @@ public class EditFeatureHelper {
         return feature;
     }
 
-    public static boolean updateBulk(SimpleFeatureType sft, EntityManager em, String filter, Map<String, String> updateFields) throws Exception {
+    public static boolean updateBulk(SimpleFeatureType sft, EntityManager em, String filter, Map<String, String> updateFields, boolean useSQLFiltering) throws Exception {
         SimpleFeatureStore store = getDatastore(sft);
-        if (store.getDataStore() instanceof JDBCDataStore) {
+        List<String> attributes = new ArrayList<>();
+        List values = new ArrayList();
+        Filter finalFilter = null;
+        if (store.getDataStore() instanceof JDBCDataStore && useSQLFiltering) {
             FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
             JDBCDataStore da = (JDBCDataStore) store.getDataStore();
             PrimaryKey pk = da.getPrimaryKey(store.getSchema());
-            if(pk.getColumns().size() > 1) {
+            if (pk.getColumns().size() > 1) {
                 throw new IllegalArgumentException("No support for multiple column primary key");
             }
             String pkColumn = pk.getColumns().get(0).getName();
             String sqlWhere = "";
-            if(!filter.isEmpty()) {
+            if (!filter.isEmpty()) {
                 sqlWhere = FilterHelper.getSQLQuery(da, sft.getTypeName(), em, filter);
             }
-            List<String> attributes = new ArrayList<>();
-            List values = new ArrayList();
-            Filter finalFilter  = getFeaturesWithSQL(da, sft, sqlWhere, pkColumn, ff);
-            updateFields.forEach((k,v) -> {
-                if(v != null) {
-                    attributes.add(k);
-                    values.add(v);
-                }
-            });
-            try {
-                Transaction transaction = new DefaultTransaction("bulk");
-                store.setTransaction(transaction);
 
-                store.modifyFeatures(attributes.toArray(new String[]{}), values.toArray(), finalFilter);
-                transaction.commit();
-            } catch (Exception e) {
-                throw (e);
-            }
+            finalFilter = getFeaturesWithSQL(da, sft, sqlWhere, pkColumn, ff);
+        } else  {
+            finalFilter = TailormapCQL.toFilter(filter, em);
         }
-         return true;
+        updateFields.forEach((k,v) -> {
+            if(v != null) {
+                attributes.add(k);
+                values.add(v);
+            }
+        });
+        try {
+            Transaction transaction = new DefaultTransaction("bulk");
+            store.setTransaction(transaction);
+
+            store.modifyFeatures(attributes.toArray(new String[]{}), values.toArray(), finalFilter);
+            transaction.commit();
+        } catch (Exception e) {
+            throw (e);
+        }
+
+     return true;
     }
 
     public static boolean deleteFeature(ApplicationLayer appLayer, EntityManager em, String fid, SimpleFeatureType sft) throws Exception {
