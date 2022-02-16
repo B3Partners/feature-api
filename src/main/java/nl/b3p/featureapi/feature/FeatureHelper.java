@@ -177,6 +177,7 @@ public class FeatureHelper {
                     r.setForeignFeatureTypeId(rel.getForeignFeatureType().getId());
                     r.setForeignFeatureTypeName(rel.getForeignFeatureType().getTypeName());
                     r.setSearchNextRelation(rel.isSearchNextRelation());
+                    r.setCanCreateNewRelation(rel.isCanCreateNewRelation());
                     try {
                         FeatureTypeRelationKey relationKey = rel.getRelationKeys().get(0);
                         r.setColumnName(relationKey.getLeftSide().getName());

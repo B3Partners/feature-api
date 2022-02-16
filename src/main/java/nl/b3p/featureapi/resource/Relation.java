@@ -9,12 +9,16 @@ public class Relation {
     String columnType;
     String foreignColumnName;
     String foreignColumnType;
+    boolean searchNextRelation;
+    boolean canCreateNewRelation;
+
+    public boolean isCanCreateNewRelation() { return canCreateNewRelation; }
+
+    public void setCanCreateNewRelation(boolean canCreateNewRelation) { this.canCreateNewRelation = canCreateNewRelation; }
 
     public boolean isSearchNextRelation() { return searchNextRelation; }
 
     public void setSearchNextRelation(boolean searchNextRelation) { this.searchNextRelation = searchNextRelation; }
-
-    boolean searchNextRelation;
 
     public String getFilter() {
         return filter;
