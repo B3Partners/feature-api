@@ -10,6 +10,12 @@ public class Relation {
     String foreignColumnName;
     String foreignColumnType;
 
+    public boolean isSearchNextRelation() { return searchNextRelation; }
+
+    public void setSearchNextRelation(boolean searchNextRelation) { this.searchNextRelation = searchNextRelation; }
+
+    boolean searchNextRelation;
+
     public String getFilter() {
         return filter;
     }

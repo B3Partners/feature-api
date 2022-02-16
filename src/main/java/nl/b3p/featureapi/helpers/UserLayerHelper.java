@@ -2,8 +2,8 @@ package nl.b3p.featureapi.helpers;
 
 import nl.b3p.featureapi.feature.FeatureHelper;
 import nl.b3p.featureapi.repository.LayerRepo;
-import nl.viewer.config.app.ApplicationLayer;
-import nl.viewer.config.services.Layer;
+import nl.tailormap.viewer.config.app.ApplicationLayer;
+import nl.tailormap.viewer.config.services.Layer;
 
 import java.util.ArrayList;
 import java.util.List;

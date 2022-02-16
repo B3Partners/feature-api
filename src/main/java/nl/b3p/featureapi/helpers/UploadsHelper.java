@@ -1,8 +1,8 @@
 package nl.b3p.featureapi.helpers;
 
-import nl.viewer.config.app.ApplicationLayer;
-import nl.viewer.config.app.FileUpload;
-import nl.viewer.config.services.Layer;
+import nl.tailormap.viewer.config.app.ApplicationLayer;
+import nl.tailormap.viewer.config.app.FileUpload;
+import nl.tailormap.viewer.config.services.Layer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

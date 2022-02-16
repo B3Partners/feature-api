@@ -3,12 +3,11 @@ package nl.b3p.featureapi.controller;
 
 import nl.b3p.featureapi.helpers.FeatureSourceFactoryHelper;
 import nl.b3p.featureapi.repository.FeatureSourceRepo;
-import nl.b3p.featureapi.resource.Feature;
 import nl.b3p.featureapi.resource.koppellijst.Attribuut;
 import nl.b3p.featureapi.resource.koppellijst.Domein;
 import nl.b3p.featureapi.resource.koppellijst.Domeinwaarde;
-import nl.viewer.config.metadata.Metadata;
-import nl.viewer.config.services.FeatureSource;
+import nl.tailormap.viewer.config.metadata.Metadata;
+import nl.tailormap.viewer.config.services.FeatureSource;
 import org.geotools.data.DataStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.factory.CommonFactoryFinder;

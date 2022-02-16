@@ -1,10 +1,10 @@
 package nl.b3p.featureapi.helpers;
 
 import nl.b3p.featureapi.resource.TailormapCQL;
-import nl.viewer.config.services.AttributeDescriptor;
-import nl.viewer.config.services.FeatureTypeRelation;
-import nl.viewer.config.services.FeatureTypeRelationKey;
-import nl.viewer.config.services.SimpleFeatureType;
+import nl.tailormap.viewer.config.services.AttributeDescriptor;
+import nl.tailormap.viewer.config.services.FeatureTypeRelation;
+import nl.tailormap.viewer.config.services.FeatureTypeRelationKey;
+import nl.tailormap.viewer.config.services.SimpleFeatureType;
 import org.geotools.data.Query;
 import org.geotools.data.jdbc.FilterToSQLException;
 import org.geotools.factory.CommonFactoryFinder;
