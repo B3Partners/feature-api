@@ -165,15 +165,15 @@ public class FeatureHelper {
                 Query foreignQ = new Query(foreignFs.getName().toString());
                 //create filter
                 Filter filter = FilterHelper.createFilter(feature, rel);
-                if (filter == null) {
-                    return;
-                }
+
                 //if join only get 1 feature
                 if (isJoin) {
                     foreignQ.setMaxFeatures(1);
                 }else{
                     Relation r = new Relation();
-                    r.setFilter(CQL.toCQL(filter));
+                    if (filter != null) {
+                        r.setFilter(CQL.toCQL(filter));
+                    }
                     r.setForeignFeatureTypeId(rel.getForeignFeatureType().getId());
                     r.setForeignFeatureTypeName(rel.getForeignFeatureType().getTypeName());
                     r.setSearchNextRelation(rel.isSearchNextRelation());
@@ -186,6 +186,9 @@ public class FeatureHelper {
                         r.setForeignColumnType(relationKey.getRightSide().getType());
                     } catch (IndexOutOfBoundsException ignored) {}
                     parent.getRelations().add(r);
+                }
+                if (filter == null) {
+                    continue;
                 }
                 foreignQ.setFilter(filter);
                 //set propertynames
