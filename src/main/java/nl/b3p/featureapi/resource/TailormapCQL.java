@@ -1,8 +1,8 @@
 package nl.b3p.featureapi.resource;
 
-import nl.viewer.config.services.FeatureTypeRelation;
-import nl.viewer.config.services.FeatureTypeRelationKey;
-import nl.viewer.config.services.SimpleFeatureType;
+import nl.tailormap.viewer.config.services.FeatureTypeRelation;
+import nl.tailormap.viewer.config.services.FeatureTypeRelationKey;
+import nl.tailormap.viewer.config.services.SimpleFeatureType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -8,10 +8,10 @@ import nl.b3p.featureapi.repository.LayerRepo;
 import nl.b3p.featureapi.resource.Feature;
 import nl.b3p.featureapi.resource.GeometryType;
 import nl.b3p.featureapi.resource.Relation;
-import nl.viewer.config.app.Application;
-import nl.viewer.config.app.ApplicationLayer;
-import nl.viewer.config.app.ConfiguredAttribute;
-import nl.viewer.config.services.*;
+import nl.tailormap.viewer.config.app.Application;
+import nl.tailormap.viewer.config.app.ApplicationLayer;
+import nl.tailormap.viewer.config.app.ConfiguredAttribute;
+import nl.tailormap.viewer.config.services.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.geotools.data.FeatureSource;
@@ -85,7 +85,7 @@ public class FeatureHelper {
                     JSONObject jsonFeature = new JSONObject();
                     jsonFeature.put("__UPLOADS__", uploads);
                     // todo process uploads
-                    Feature j = createFeature(feature, ft, al, propertyNames, attributeAliases, 0, application, em, layerRepo);
+                    Feature j = createFeature(feature, ft, al, propertyNames, attributeAliases, 0, application, em, layerRepo, true, null);
 
                     features.add(j);
                 }
@@ -104,7 +104,7 @@ public class FeatureHelper {
 
     private static Feature createFeature(SimpleFeature f, SimpleFeatureType ft, ApplicationLayer al,
                                          List<String> propertyNames, Map<String, String> attributeAliases, int index,
-                                         Application app, EntityManager em, LayerRepo layerRepo) throws JSONException, Exception {
+                                         Application app, EntityManager em, LayerRepo layerRepo, boolean findNextRelations, SimpleFeatureType head) throws JSONException, Exception {
         Feature j = new Feature();
         String typename = ft.getTypeName();
 
@@ -122,9 +122,12 @@ public class FeatureHelper {
                 j.put(name, value, ad.getType());
             }
         }
-
-        if (ft.hasRelations()) {
-            populateWithRelatedFeatures(j, f, ft, al, index, app, em, layerRepo);
+        if (ft.hasRelations() && findNextRelations) {
+            if (head == null) {
+                populateWithRelatedFeatures(j, f, ft, al, index, app, em, layerRepo, ft);
+            } else if (!head.getTypeName().equals(ft.getTypeName())) {
+                populateWithRelatedFeatures(j, f, ft, al, index, app, em, layerRepo, head);
+            }
         }
 
         String id = f.getID();
@@ -152,7 +155,7 @@ public class FeatureHelper {
      * Populate the json object with related featues
      */
     private static void populateWithRelatedFeatures(Feature parent, SimpleFeature feature, SimpleFeatureType ft,
-                                                    ApplicationLayer al, int index, Application app, EntityManager em, LayerRepo layerRepo) throws Exception {
+                                                    ApplicationLayer al, int index, Application app, EntityManager em, LayerRepo layerRepo, SimpleFeatureType head) throws Exception {
         for (FeatureTypeRelation rel : ft.getRelations()) {
             boolean isJoin = rel.getType().equals(FeatureTypeRelation.JOIN);
 
@@ -162,17 +165,19 @@ public class FeatureHelper {
                 Query foreignQ = new Query(foreignFs.getName().toString());
                 //create filter
                 Filter filter = FilterHelper.createFilter(feature, rel);
-                if (filter == null) {
-                    return;
-                }
+
                 //if join only get 1 feature
                 if (isJoin) {
                     foreignQ.setMaxFeatures(1);
                 }else{
                     Relation r = new Relation();
-                    r.setFilter(CQL.toCQL(filter));
+                    if (filter != null) {
+                        r.setFilter(CQL.toCQL(filter));
+                    }
                     r.setForeignFeatureTypeId(rel.getForeignFeatureType().getId());
                     r.setForeignFeatureTypeName(rel.getForeignFeatureType().getTypeName());
+                    r.setSearchNextRelation(rel.isSearchNextRelation());
+                    r.setCanCreateNewRelation(rel.isCanCreateNewRelation());
                     try {
                         FeatureTypeRelationKey relationKey = rel.getRelationKeys().get(0);
                         r.setColumnName(relationKey.getLeftSide().getName());
@@ -181,6 +186,9 @@ public class FeatureHelper {
                         r.setForeignColumnType(relationKey.getRightSide().getType());
                     } catch (IndexOutOfBoundsException ignored) {}
                     parent.getRelations().add(r);
+                }
+                if (filter == null) {
+                    continue;
                 }
                 foreignQ.setFilter(filter);
                 //set propertynames
@@ -210,7 +218,7 @@ public class FeatureHelper {
                     SimpleFeature foreignFeature = foreignIt.next();
                     //join it in the same json
                     Feature other = createFeature(foreignFeature, rel.getForeignFeatureType(), al, propertyNames,
-                            attributeAliases, index, app, em, layerRepo);
+                            attributeAliases, index, app, em, layerRepo, rel.isSearchNextRelation(), head);
                     if (isJoin) {
                         parent.joinAttributes(other);
                     } else {

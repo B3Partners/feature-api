@@ -1,7 +1,7 @@
 package nl.b3p.featureapi.helpers;
 
-import nl.geotools.data.arcgis.ArcGISDataStoreFactory;
-import nl.viewer.config.services.*;
+import nl.tailormap.geotools.data.arcgis.ArcGISDataStoreFactory;
+import nl.tailormap.viewer.config.services.*;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
@@ -64,11 +64,11 @@ public class FeatureSourceFactoryHelper {
     }
 
     public static DataStore getDatastore(SimpleFeatureType sft) throws Exception {
-        nl.viewer.config.services.FeatureSource fs = sft.getFeatureSource();
+        nl.tailormap.viewer.config.services.FeatureSource fs = sft.getFeatureSource();
         return getDatastore(fs);
     }
 
-    public static DataStore getDatastore(nl.viewer.config.services.FeatureSource fs) throws Exception {
+    public static DataStore getDatastore(nl.tailormap.viewer.config.services.FeatureSource fs) throws Exception {
         Map params = new HashMap();
         switch(fs.getProtocol()){
             case "jdbc":

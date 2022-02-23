@@ -69,6 +69,36 @@ paths:
             application/json:
               schema:
                 type: boolean
+  /features/updatebulk/{application}/{featureType}:
+    put:
+      tags:
+      - feature-controller
+      operationId: updateBulk
+      parameters:
+      - name: application
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: featureType
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkUpdateBody'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
   /features/{application}/{featuretype}:
     post:
       tags:
@@ -104,6 +134,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Feature'
+  /features/by-id/{application}/{featureType}:
+    post:
+      tags:
+      - feature-controller
+      operationId: getFeaturesForIds
+      parameters:
+      - name: application
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: featureType
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feature'
   /features/{application}/{x}/{y}/{scale}:
     get:
       tags:
@@ -189,39 +253,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Feature'
-  /features/by-id/{application}/{featureType}:
-    post:
-      tags:
-        - feature-controller
-      operationId: getFeaturesForIds
-      parameters:
-        - name: application
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: featureType
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Feature'
   /features/info/{appId}/{featureTypes}:
     get:
       tags:
@@ -297,9 +328,9 @@ components:
             $ref: '#/components/schemas/Field'
         defaultGeometry:
           type: string
-        defaultGeometryField:
-          type: string
         fid:
+          type: string
+        defaultGeometryField:
           type: string
     Field:
       type: object
@@ -320,6 +351,29 @@ components:
           format: int64
         foreignFeatureTypeName:
           type: string
+        columnName:
+          type: string
+        columnType:
+          type: string
+        foreignColumnName:
+          type: string
+        foreignColumnType:
+          type: string
+        searchNextRelation:
+          type: boolean
+        canCreateNewRelation:
+          type: boolean
+    BulkUpdateBody:
+      type: object
+      properties:
+        filter:
+          type: string
+        useSQLFiltering:
+          type: boolean
+        updatedFields:
+          type: object
+          additionalProperties:
+            type: string
     FeaturetypeMetadata:
       type: object
       properties:
