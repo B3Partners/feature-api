@@ -115,6 +115,33 @@ public class EditFeatureHelper {
         return feature;
     }
 
+    public static boolean removeRelation(ApplicationLayer appLayer, Layer layer, String relationColumn, String fid,
+                                         EntityManager em, SimpleFeatureType sft, Application app, LayerRepo layerRepo) throws Exception {
+        SimpleFeatureStore store = getDatastore(sft);
+
+        Transaction transaction = new DefaultTransaction("edit");
+        store.setTransaction(transaction);
+
+        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
+        Filter filter = ff.id(new FeatureIdImpl(fid));
+
+        try {
+            store.modifyFeatures(relationColumn, null, filter);
+            transaction.commit();
+        } catch (Exception e) {
+            log.error("Cannot update: ", e);
+            transaction.rollback();
+            throw e;
+        } finally {
+            transaction.close();
+            if(store != null){
+                store.getDataStore().dispose();
+            }
+        }
+
+        return true;
+    }
+
     public static boolean updateBulk(SimpleFeatureType sft, EntityManager em, String filter, Map<String, String> updateFields, boolean useSQLFiltering) throws Exception {
         SimpleFeatureStore store = getDatastore(sft);
         List<String> attributes = new ArrayList<>();
