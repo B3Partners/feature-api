@@ -201,7 +201,7 @@ public class FeatureController {
     }
 
     @PostMapping("/removerelation/{application}/{featureType}")
-    public Boolean removeRelation(@PathVariable Long application, @PathVariable String featureType,
+    public Feature removeRelation(@PathVariable Long application, @PathVariable String featureType,
                           @RequestBody RemoveRelationBody requestBody) throws Exception {
 
         ApplicationLayer appLayer = getAppLayer(featureType, application);
@@ -217,12 +217,12 @@ public class FeatureController {
 
         if(featureId == null || relationColumn == null) {
             log.error("Can not delete relation; featureId or RelationColumn can not be null or empty");
-            return false;
+            return null;
         }
 
         SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featureType);
 
-        return EditFeatureHelper.removeRelation(appLayer, layer, relationColumn, featureId, em, sft, app, layerRepo);
+        return EditFeatureHelper.removeRelation(appLayer, relationColumn, featureId, em, sft, app, layerRepo);
     }
 
     @PutMapping("/{application}/{featuretype}/{fid}")
