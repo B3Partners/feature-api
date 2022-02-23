@@ -115,10 +115,10 @@ public class EditFeatureHelper {
         return feature;
     }
 
-    public static boolean removeRelation(ApplicationLayer appLayer, Layer layer, String relationColumn, String fid,
+    public static Feature removeRelation(ApplicationLayer appLayer, String relationColumn, String fid,
                                          EntityManager em, SimpleFeatureType sft, Application app, LayerRepo layerRepo) throws Exception {
         SimpleFeatureStore store = getDatastore(sft);
-
+        Feature feature = null;
         Transaction transaction = new DefaultTransaction("edit");
         store.setTransaction(transaction);
 
@@ -128,6 +128,7 @@ public class EditFeatureHelper {
         try {
             store.modifyFeatures(relationColumn, null, filter);
             transaction.commit();
+            feature = getFeature(fid, store, appLayer, sft, em, app, layerRepo);
         } catch (Exception e) {
             log.error("Cannot update: ", e);
             transaction.rollback();
@@ -139,7 +140,7 @@ public class EditFeatureHelper {
             }
         }
 
-        return true;
+        return feature;
     }
 
     public static boolean updateBulk(SimpleFeatureType sft, EntityManager em, String filter, Map<String, String> updateFields, boolean useSQLFiltering) throws Exception {
