@@ -7,10 +7,7 @@ import nl.b3p.featureapi.helpers.UserLayerHelper;
 import nl.b3p.featureapi.repository.ApplicationLayerRepo;
 import nl.b3p.featureapi.repository.ApplicationRepo;
 import nl.b3p.featureapi.repository.LayerRepo;
-import nl.b3p.featureapi.resource.BulkUpdateBody;
-import nl.b3p.featureapi.resource.Feature;
-import nl.b3p.featureapi.resource.FeaturetypeMetadata;
-import nl.b3p.featureapi.resource.GeometryType;
+import nl.b3p.featureapi.resource.*;
 import nl.tailormap.viewer.config.app.Application;
 import nl.tailormap.viewer.config.app.ApplicationLayer;
 import nl.tailormap.viewer.config.services.FeatureTypeRelation;
@@ -201,6 +198,31 @@ public class FeatureController {
         Feature savedFeature = EditFeatureHelper.save(appLayer, em, f, sft, app, layerRepo);
 
         return savedFeature;
+    }
+
+    @PostMapping("/removerelation/{application}/{featureType}")
+    public Boolean removeRelation(@PathVariable Long application, @PathVariable String featureType,
+                          @RequestBody RemoveRelationBody requestBody) throws Exception {
+
+        ApplicationLayer appLayer = getAppLayer(featureType, application);
+        Application app = this.appRepo.findById(application).orElseThrow();
+
+        Layer layer = getLayer(appLayer);
+        if (layer.getFeatureType() == null) {
+            throw new IllegalArgumentException("Layer has no featuretype configured");
+        }
+
+        String featureId = requestBody.getFeatureId();
+        String relationColumn = requestBody.getRelationColumn();
+
+        if(featureId == null || relationColumn == null) {
+            log.error("Can not delete relation; featureId or RelationColumn can not be null or empty");
+            return false;
+        }
+
+        SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featureType);
+
+        return EditFeatureHelper.removeRelation(appLayer, layer, relationColumn, featureId, em, sft, app, layerRepo);
     }
 
     @PutMapping("/{application}/{featuretype}/{fid}")
