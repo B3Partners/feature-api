@@ -134,6 +134,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Feature'
+  /features/removerelation/{application}/{featureType}:
+    post:
+      tags:
+      - feature-controller
+      operationId: removeRelation
+      parameters:
+      - name: application
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: featureType
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveRelationBody'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
   /features/by-id/{application}/{featureType}:
     post:
       tags:
@@ -328,9 +358,9 @@ components:
             $ref: '#/components/schemas/Field'
         defaultGeometry:
           type: string
-        fid:
-          type: string
         defaultGeometryField:
+          type: string
+        fid:
           type: string
     Field:
       type: object
@@ -374,6 +404,13 @@ components:
           type: object
           additionalProperties:
             type: string
+    RemoveRelationBody:
+      type: object
+      properties:
+        featureId:
+          type: string
+        relationColumn:
+          type: string
     FeaturetypeMetadata:
       type: object
       properties:
