@@ -163,7 +163,7 @@ paths:
           content:
             application/json:
               schema:
-                type: boolean
+                $ref: '#/components/schemas/Feature'
   /features/by-id/{application}/{featureType}:
     post:
       tags:
@@ -358,9 +358,9 @@ components:
             $ref: '#/components/schemas/Field'
         defaultGeometry:
           type: string
-        defaultGeometryField:
-          type: string
         fid:
+          type: string
+        defaultGeometryField:
           type: string
     Field:
       type: object
