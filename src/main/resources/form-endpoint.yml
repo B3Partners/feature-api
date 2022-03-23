@@ -358,9 +358,9 @@ components:
             $ref: '#/components/schemas/Field'
         defaultGeometry:
           type: string
-        fid:
-          type: string
         defaultGeometryField:
+          type: string
+        fid:
           type: string
     Field:
       type: object
