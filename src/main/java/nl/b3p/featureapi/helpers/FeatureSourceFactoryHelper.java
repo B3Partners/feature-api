@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class FeatureSourceFactoryHelper {
     private static Logger log = LoggerFactory.getLogger(FeatureSourceFactoryHelper.class);
@@ -21,17 +23,20 @@ public class FeatureSourceFactoryHelper {
 
     public static SimpleFeatureType getSimpleFeatureType(Layer layer, String typename){
         SimpleFeatureType type = layer.getFeatureType();
-
-        return getSimpleFeatureType(type, typename);
+        Set<String> visitedFeatureTypes = new LinkedHashSet<>();
+        return getSimpleFeatureType(type, typename, visitedFeatureTypes);
     }
-    public static SimpleFeatureType getSimpleFeatureType(SimpleFeatureType sft, String typename){
+    public static SimpleFeatureType getSimpleFeatureType(SimpleFeatureType sft, String typename, Set<String> visitedFeatureTypes){
         if(isSimpleFeatureTypeTypename(typename, sft)){
             return sft;
+        }else if(visitedFeatureTypes.contains(sft.getTypeName())){
+            return null;
         }else{
+            visitedFeatureTypes.add(sft.getTypeName());
             for(FeatureTypeRelation rel : sft.getRelations()){
-                SimpleFeatureType test = getSimpleFeatureType(rel.getForeignFeatureType(), typename);
-                if(test != null){
-                    return test;
+                SimpleFeatureType relSft = getSimpleFeatureType(rel.getForeignFeatureType(), typename, visitedFeatureTypes);
+                if(relSft != null){
+                    return relSft;
                 }
             }
             return null;

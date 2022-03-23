@@ -337,21 +337,26 @@ public class FeatureController {
     //this method must/can be removed if the layername isn't changed by the frontend and passport converter anymore
     private boolean appLayerInFeatureTypes(ApplicationLayer al, List<String> featureTypes) {
         String origName = al.getLayerName();
-
+        Set<String> visitedFeatureTypes = new LinkedHashSet<>();
         Layer l = getLayer(al);
 
         SimpleFeatureType sft = l.getFeatureType();
-        return appLayerInFeatureTypes(sft, featureTypes);
+        return appLayerInFeatureTypes(sft, featureTypes, visitedFeatureTypes);
     }
 
-    private boolean appLayerInFeatureTypes(SimpleFeatureType sft, List<String> featureTypes) {
+    private boolean appLayerInFeatureTypes(SimpleFeatureType sft, List<String> featureTypes, Set<String> visitedFeatureTypes) {
+        if(visitedFeatureTypes.contains(sft.getTypeName())){
+            return false;
+        } else {
+            visitedFeatureTypes.add(sft.getTypeName());
+        }
         if (appLayerInFeatureTypes(sft.getTypeName(), featureTypes)) {
             return true;
         }
 
         List<SimpleFeatureType> sfts = sft.getRelations().stream().map(featureTypeRelation -> featureTypeRelation.getForeignFeatureType()).collect(Collectors.toList());
         for (SimpleFeatureType type : sfts) {
-            if (appLayerInFeatureTypes(type, featureTypes)) {
+            if (appLayerInFeatureTypes(type, featureTypes, visitedFeatureTypes)) {
                 return true;
             }
         }
@@ -384,7 +389,12 @@ public class FeatureController {
         if (applicationLayers.isEmpty()) {
             throw new IllegalArgumentException("Featuretype has no applayers configured in DB");
         }
-        return applicationLayers.get(0);
+        for (ApplicationLayer layer: applicationLayers) {
+            if(layer.getLayerName().equals(featuretype)){
+                return layer;
+            }
+        }
+        return applicationLayers.get(applicationLayers.size()-1);
     }
 
 }
