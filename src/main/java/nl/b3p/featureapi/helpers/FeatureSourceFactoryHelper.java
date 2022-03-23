@@ -34,9 +34,9 @@ public class FeatureSourceFactoryHelper {
         }else{
             visitedFeatureTypes.add(sft.getTypeName());
             for(FeatureTypeRelation rel : sft.getRelations()){
-                SimpleFeatureType test = getSimpleFeatureType(rel.getForeignFeatureType(), typename, visitedFeatureTypes);
-                if(test != null){
-                    return test;
+                SimpleFeatureType relSft = getSimpleFeatureType(rel.getForeignFeatureType(), typename, visitedFeatureTypes);
+                if(relSft != null){
+                    return relSft;
                 }
             }
             return null;
