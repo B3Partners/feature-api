@@ -101,7 +101,7 @@
         <dependency>
             <groupId>org.tailormap</groupId>
             <artifactId>viewer-config-persistence</artifactId>
-            <version>5.9.16-SNAPSHOT</version>
+            <version>5.9.16</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.tailormap</groupId>
             <artifactId>geotools-commons</artifactId>
-            <version>5.9.16-SNAPSHOT</version>
+            <version>5.9.16</version>
         </dependency>
 
         <dependency>
