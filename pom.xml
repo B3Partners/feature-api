@@ -9,7 +9,7 @@
     </parent>
     <groupId>nl.b3p</groupId>
     <artifactId>feature-api</artifactId>
-    <version>5.9.13-SNAPSHOT</version>
+    <version>5.9.12-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>feature-api</name>
     <description>Endpoint for features used in tailormap</description>
@@ -101,7 +101,7 @@
         <dependency>
             <groupId>org.tailormap</groupId>
             <artifactId>viewer-config-persistence</artifactId>
-            <version>5.9.16</version>
+            <version>5.9.17</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.tailormap</groupId>
             <artifactId>geotools-commons</artifactId>
-            <version>5.9.16</version>
+            <version>5.9.17</version>
         </dependency>
 
         <dependency>
