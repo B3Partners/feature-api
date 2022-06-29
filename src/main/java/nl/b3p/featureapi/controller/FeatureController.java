@@ -13,6 +13,7 @@ import nl.tailormap.viewer.config.app.ApplicationLayer;
 import nl.tailormap.viewer.config.services.FeatureTypeRelation;
 import nl.tailormap.viewer.config.services.Layer;
 import nl.tailormap.viewer.config.services.SimpleFeatureType;
+import org.apache.commons.io.IOUtils;
 import org.geotools.data.*;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureIterator;
@@ -26,9 +27,17 @@ import org.opengis.filter.FilterFactory2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +46,9 @@ import java.util.stream.Collectors;
 @RestController
 public class FeatureController {
     Logger log = LoggerFactory.getLogger(FeatureController.class);
+
+    @Value("${image.path}")
+    private String imagePath;
 
     private boolean graph = false;
 
@@ -72,6 +84,22 @@ public class FeatureController {
             }
         });
         return features;
+    }
+
+    @GetMapping(value = "/{image}")
+    public @ResponseBody void getImage(@PathVariable String image, HttpServletResponse response) throws IOException {
+        try {
+            File imageFile = new File(imagePath + image);
+            response.setContentType("image/jpeg");
+            InputStream in = new FileInputStream(imageFile);
+            IOUtils.copy(in, response.getOutputStream());
+        } catch (Exception e) {
+            log.error("Cant read image", e);
+            File imageFile = new ClassPathResource("broken-image.png").getFile();
+            response.setContentType("image/png");
+            InputStream in = new FileInputStream(imageFile);
+            IOUtils.copy(in, response.getOutputStream());
+        }
     }
 
     @GetMapping(value = "/{application}/{featureTypes}/{x}/{y}/{scale}")
@@ -239,7 +267,7 @@ public class FeatureController {
 
         SimpleFeatureType sft = FeatureSourceFactoryHelper.getSimpleFeatureType(layer, featuretype);
 
-        feature = EditFeatureHelper.update(appLayer, layer, feature, fid, em, sft, app, layerRepo);
+        feature = EditFeatureHelper.update(appLayer, layer, feature, fid, em, sft, app, layerRepo, imagePath);
         return feature;
     }
 

@@ -101,7 +101,7 @@
         <dependency>
             <groupId>org.tailormap</groupId>
             <artifactId>viewer-config-persistence</artifactId>
-            <version>5.9.17</version>
+            <version>5.9.19-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
