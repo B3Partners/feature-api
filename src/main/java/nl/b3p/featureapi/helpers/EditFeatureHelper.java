@@ -9,6 +9,8 @@ import nl.tailormap.viewer.config.app.Application;
 import nl.tailormap.viewer.config.app.ApplicationLayer;
 import nl.tailormap.viewer.config.services.Layer;
 import nl.tailormap.viewer.config.services.SimpleFeatureType;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.geotools.data.*;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
@@ -26,12 +28,16 @@ import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.identity.FeatureId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.persistence.EntityManager;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Base64;
 import java.util.Date;
 
 public class EditFeatureHelper {
@@ -41,7 +47,7 @@ public class EditFeatureHelper {
     private static FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
 
     public static Feature update(ApplicationLayer appLayer, Layer layer, Feature feature, String fid,
-                                 EntityManager em, SimpleFeatureType sft, Application app, LayerRepo layerRepo) throws Exception {
+                                 EntityManager em, SimpleFeatureType sft, Application app, LayerRepo layerRepo, String imagePath) throws Exception {
         SimpleFeatureStore store = getDatastore(sft);
 
         Transaction transaction = new DefaultTransaction("edit");
@@ -78,6 +84,17 @@ public class EditFeatureHelper {
                             } else if (ad.getType().getBinding().getCanonicalName().equals("byte[]")) {
                                 values.add(value);
                             } else {
+                                if(value.toString().startsWith("data:image")) {
+                                    if(value.toString().contains(",")) {
+                                        String metadataImg = value.toString().split(",")[0];
+                                        String encodedImg = value.toString().split(",")[1];
+                                        byte[] decodedImg = Base64.getDecoder().decode(encodedImg.getBytes(StandardCharsets.UTF_8));
+                                        String extension = StringUtils.substringBetween(metadataImg, "/", ";");
+                                        Path destinationFile = Paths.get(imagePath, RandomStringUtils.randomAlphanumeric(16) + "." + extension);
+                                        Files.write(destinationFile, decodedImg);
+                                        value = imagePath + destinationFile.getFileName();
+                                    }
+                                }
                                 //    hier gaat iets niet goed: als een attribuut een int is die niet is ingevuld, is de value een lege string
                                 values.add(value);
                             }
