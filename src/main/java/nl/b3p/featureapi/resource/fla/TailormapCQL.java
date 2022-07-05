@@ -1,4 +1,4 @@
-package nl.b3p.featureapi.resource;
+package nl.b3p.featureapi.resource.fla;
 
 import nl.tailormap.viewer.config.services.FeatureTypeRelation;
 import nl.tailormap.viewer.config.services.FeatureTypeRelationKey;

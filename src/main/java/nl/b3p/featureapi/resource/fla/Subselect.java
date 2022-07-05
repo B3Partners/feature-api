@@ -1,4 +1,4 @@
-package nl.b3p.featureapi.resource;
+package nl.b3p.featureapi.resource.fla;
 
 import nl.b3p.featureapi.helpers.TMFilterToSQL;
 import org.opengis.filter.Filter;

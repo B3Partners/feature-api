@@ -4,10 +4,10 @@ import nl.b3p.featureapi.feature.FeatureHelper;
 import nl.b3p.featureapi.helpers.FeatureSourceFactoryHelper;
 import nl.b3p.featureapi.helpers.EditFeatureHelper;
 import nl.b3p.featureapi.helpers.UserLayerHelper;
-import nl.b3p.featureapi.repository.ApplicationLayerRepo;
-import nl.b3p.featureapi.repository.ApplicationRepo;
-import nl.b3p.featureapi.repository.LayerRepo;
-import nl.b3p.featureapi.resource.*;
+import nl.b3p.featureapi.repository.fla.ApplicationLayerRepo;
+import nl.b3p.featureapi.repository.fla.ApplicationRepo;
+import nl.b3p.featureapi.repository.fla.LayerRepo;
+import nl.b3p.featureapi.resource.fla.*;
 import nl.tailormap.viewer.config.app.Application;
 import nl.tailormap.viewer.config.app.ApplicationLayer;
 import nl.tailormap.viewer.config.services.FeatureTypeRelation;
@@ -32,7 +32,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletRequest;
+import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,7 +63,7 @@ public class FeatureController {
     @Autowired
     private ApplicationLayerRepo appLayerRepo;
 
-    @Autowired
+    @PersistenceContext
     private EntityManager em;
 
     @GetMapping(value = "/{application}/{x}/{y}/{scale}")
@@ -89,7 +89,12 @@ public class FeatureController {
     @GetMapping(value = "/{image}")
     public @ResponseBody void getImage(@PathVariable String image, HttpServletResponse response) throws IOException {
         try {
-            File imageFile = new File(imagePath + image);
+            File parent = new File(imagePath);
+            File imageFile = new File(parent, image);
+            if(!imageFile.getCanonicalPath().startsWith(imagePath)) {
+                log.error("Path traversal found: " + image);
+                return;
+            }
             response.setContentType("image/jpeg");
             InputStream in = new FileInputStream(imageFile);
             IOUtils.copy(in, response.getOutputStream());

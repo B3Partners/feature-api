@@ -1,6 +1,6 @@
 package nl.b3p.featureapi.feature;
 
-import nl.b3p.featureapi.resource.Feature;
+import nl.b3p.featureapi.resource.fla.Feature;
 
 import java.util.List;
 

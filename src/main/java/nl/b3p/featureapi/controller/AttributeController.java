@@ -2,7 +2,7 @@ package nl.b3p.featureapi.controller;
 
 
 import nl.b3p.featureapi.helpers.FeatureSourceFactoryHelper;
-import nl.b3p.featureapi.repository.FeatureSourceRepo;
+import nl.b3p.featureapi.repository.fla.FeatureSourceRepo;
 import nl.b3p.featureapi.resource.koppellijst.Attribuut;
 import nl.b3p.featureapi.resource.koppellijst.Domein;
 import nl.b3p.featureapi.resource.koppellijst.Domeinwaarde;
@@ -22,12 +22,15 @@ import org.opengis.filter.identity.FeatureId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.util.*;
 
@@ -119,10 +122,10 @@ public class AttributeController {
 
     Logger log = LoggerFactory.getLogger(AttributeController.class);
     @Autowired
-    private EntityManager em;
-
-    @Autowired
     private FeatureSourceRepo featureSourceRepo;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @GetMapping("attributes/{ids}")
     public List<Attribuut> attributes(@PathVariable Set<Long> ids) {

@@ -1,6 +1,6 @@
 package nl.b3p.featureapi.helpers;
 
-import nl.b3p.featureapi.resource.TailormapCQL;
+import nl.b3p.featureapi.resource.fla.TailormapCQL;
 import nl.tailormap.viewer.config.services.AttributeDescriptor;
 import nl.tailormap.viewer.config.services.FeatureTypeRelation;
 import nl.tailormap.viewer.config.services.FeatureTypeRelationKey;
@@ -112,6 +112,11 @@ public class FilterHelper {
     public static String getSQLQuery(JDBCDataStore dataStore, String tableName, EntityManager em, String filter) throws CQLException, FilterToSQLException, IOException {
         TMFilterToSQL f = new TMFilterToSQL(dataStore, tableName);
         f.createFilterCapabilities();
+        return f.encodeToString(TailormapCQL.toFilter(filter, em));
+    }
+
+    public static String getSQLQuery(String filter, EntityManager em) throws CQLException, FilterToSQLException, IOException {
+        TMFilterToSQL f = new TMFilterToSQL();
         return f.encodeToString(TailormapCQL.toFilter(filter, em));
     }
 }

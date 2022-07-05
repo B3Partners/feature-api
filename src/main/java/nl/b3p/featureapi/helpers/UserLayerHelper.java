@@ -1,7 +1,7 @@
 package nl.b3p.featureapi.helpers;
 
 import nl.b3p.featureapi.feature.FeatureHelper;
-import nl.b3p.featureapi.repository.LayerRepo;
+import nl.b3p.featureapi.repository.fla.LayerRepo;
 import nl.tailormap.viewer.config.app.ApplicationLayer;
 import nl.tailormap.viewer.config.services.Layer;
 

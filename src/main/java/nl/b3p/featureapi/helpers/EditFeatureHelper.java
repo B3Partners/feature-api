@@ -1,10 +1,10 @@
 package nl.b3p.featureapi.helpers;
 
 import nl.b3p.featureapi.feature.FeatureHelper;
-import nl.b3p.featureapi.repository.LayerRepo;
-import nl.b3p.featureapi.resource.Field;
-import nl.b3p.featureapi.resource.Feature;
-import nl.b3p.featureapi.resource.TailormapCQL;
+import nl.b3p.featureapi.repository.fla.LayerRepo;
+import nl.b3p.featureapi.resource.fla.Field;
+import nl.b3p.featureapi.resource.fla.Feature;
+import nl.b3p.featureapi.resource.fla.TailormapCQL;
 import nl.tailormap.viewer.config.app.Application;
 import nl.tailormap.viewer.config.app.ApplicationLayer;
 import nl.tailormap.viewer.config.services.Layer;
@@ -29,6 +29,7 @@ import org.opengis.filter.identity.FeatureId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.persistence.EntityManager;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -91,8 +92,13 @@ public class EditFeatureHelper {
                                         byte[] decodedImg = Base64.getDecoder().decode(encodedImg.getBytes(StandardCharsets.UTF_8));
                                         String extension = StringUtils.substringBetween(metadataImg, "/", ";");
                                         Path destinationFile = Paths.get(imagePath, RandomStringUtils.randomAlphanumeric(16) + "." + extension);
-                                        Files.write(destinationFile, decodedImg);
-                                        value = imagePath + destinationFile.getFileName();
+                                        File file = new File(destinationFile.toString());
+                                        if(file.getCanonicalPath().startsWith(imagePath)){
+                                            Files.write(destinationFile, decodedImg);
+                                            value = imagePath + destinationFile.getFileName();
+                                        } else {
+                                            log.error("Path traversal found");
+                                        }
                                     }
                                 }
                                 //    hier gaat iets niet goed: als een attribuut een int is die niet is ingevuld, is de value een lege string

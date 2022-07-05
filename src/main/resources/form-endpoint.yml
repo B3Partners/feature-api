@@ -198,6 +198,44 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Feature'
+  /collection:
+    post:
+      tags:
+      - collections-controller
+      operationId: add
+      parameters:
+      - name: X-Remote-User
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionModel'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+  /features/{image}:
+    get:
+      tags:
+      - feature-controller
+      operationId: getImage
+      parameters:
+      - name: image
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
   /features/{application}/{x}/{y}/{scale}:
     get:
       tags:
@@ -410,6 +448,32 @@ components:
         featureId:
           type: string
         relationColumn:
+          type: string
+    CollectionModel:
+      type: object
+      properties:
+        naam:
+          type: string
+        omschrijving:
+          type: string
+        retentie:
+          type: integer
+          format: int32
+        application:
+          type: integer
+          format: int64
+        layers:
+          type: array
+          items:
+            $ref: '#/components/schemas/LayerModel'
+    LayerModel:
+      type: object
+      properties:
+        featureTypeName:
+          type: string
+        stringFilter:
+          type: string
+        alias:
           type: string
     FeaturetypeMetadata:
       type: object
