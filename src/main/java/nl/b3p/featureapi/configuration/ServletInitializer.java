@@ -1,5 +1,6 @@
-package nl.b3p.featureapi;
+package nl.b3p.featureapi.configuration;
 
+import nl.b3p.featureapi.FeatureApiApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 

@@ -1,6 +1,6 @@
 package nl.b3p.featureapi.helpers;
 
-import nl.b3p.featureapi.resource.Subselect;
+import nl.b3p.featureapi.resource.fla.Subselect;
 import org.geotools.data.jdbc.FilterToSQL;
 import org.geotools.data.jdbc.FilterToSQLException;
 import org.geotools.filter.FilterCapabilities;
@@ -13,15 +13,25 @@ import java.io.StringWriter;
 
 public class TMFilterToSQL extends FilterToSQL {
     private FilterToSQL base;
+
     public TMFilterToSQL(JDBCDataStore dataStore, String tableName) throws IOException {
         this.featureType = dataStore.getSchema(tableName);
         this.base = ((BasicSQLDialect) dataStore.getSQLDialect()).createFilterToSQL();
     }
+
+    public TMFilterToSQL() {
+
+    }
+
     @Override
     public FilterCapabilities createFilterCapabilities() {
         FilterCapabilities caps = super.createFilterCapabilities();
         caps.addType(Subselect.class);
-        caps.addAll(this.base.getCapabilities());
+        if (this.base != null) {
+            caps.addAll(this.base.getCapabilities());
+        } else {
+            caps.addAll(BasicSQLDialect.BASE_DBMS_CAPABILITIES);
+        }
         return caps;
     }
 

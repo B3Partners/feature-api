@@ -1,4 +1,4 @@
-package nl.b3p.featureapi.resource;
+package nl.b3p.featureapi.resource.fla;
 
 import java.util.Map;
 
