@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("collection")
@@ -42,8 +43,10 @@ public class CollectionsController {
     @PostMapping
     public boolean add(@RequestBody CollectionModel collectionModel, @RequestHeader("X-Remote-User") String username) {
         try {
+            String uuid = UUID.randomUUID().toString();
             Collection collection = new Collection();
-            collection.setValues(getDataStore(collectionModel.getLayers()));
+            collection.setCollection_guid(uuid);
+            collection.setValues(getDataStore(collectionModel.getLayers(),uuid));
             collection.setDatum(new Date());
             collection.setGuid_based("Y");
             collection.setBron("GBImaps");
@@ -59,7 +62,7 @@ public class CollectionsController {
         }
     }
 
-    private List<CollectionValues> getDataStore(LayerModel[] layers) throws SQLException, FilterToSQLException, CQLException, IOException {
+    private List<CollectionValues> getDataStore(LayerModel[] layers, String uuid) throws SQLException, FilterToSQLException, CQLException, IOException {
         List<CollectionValues> values = new ArrayList<>();
         try {
             Connection c = dataSource.getConnection();

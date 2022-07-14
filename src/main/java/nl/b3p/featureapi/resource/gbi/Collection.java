@@ -17,8 +17,7 @@ public class Collection {
     name = "UUID",
     strategy = "org.hibernate.id.UUIDGenerator"
   )
-  @Column(name = "collection_guid", updatable = false, nullable = false)
-    private UUID collection_guid;
+    private String collection_guid;
     private String naam;
     private String omschrijving;
     private String gebruiker;
@@ -31,11 +30,11 @@ public class Collection {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CollectionValues> values = new ArrayList<>();
 
-    public UUID getCollection_guid() {
+    public String getCollection_guid() {
         return collection_guid;
     }
 
-    public void setCollection_guid(UUID collection_guid) {
+    public void setCollection_guid(String collection_guid) {
         this.collection_guid = collection_guid;
     }
 

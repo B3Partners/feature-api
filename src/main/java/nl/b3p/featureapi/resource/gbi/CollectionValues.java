@@ -12,7 +12,7 @@ public class CollectionValues {
     private String object_guid;
     private Integer object_id;
     private String tabel;
-    private UUID collection_guid;
+    private String collection_guid;
 
     public String getObject_guid() {
         return object_guid;
@@ -38,11 +38,11 @@ public class CollectionValues {
         this.tabel = tabel;
     }
 
-    public UUID getCollection_guid() {
+    public String getCollection_guid() {
         return collection_guid;
     }
 
-    public void setCollection_guid(UUID collection_guid) {
+    public void setCollection_guid(String collection_guid) {
         this.collection_guid = collection_guid;
     }
 
