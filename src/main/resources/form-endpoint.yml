@@ -475,6 +475,10 @@ components:
           type: string
         alias:
           type: string
+        userlayer_original_layername:
+          type: string
+        userlayer_original_feature_type_name:
+          type: string
     FeaturetypeMetadata:
       type: object
       properties:

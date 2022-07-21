@@ -74,10 +74,11 @@ public class CollectionsController {
                 }
                 layerModel.getStringFilter();
                 ResultSet res = c.prepareStatement("select id, object_guid from " + featureTypeName + " " + sqlWhere).executeQuery();
+                String originalFeatureTypeName = layerModel.getUserlayer_original_feature_type_name();
                 while (res.next()) {
                     CollectionValues cv = new CollectionValues();
                     cv.setObject_guid(res.getString("object_guid"));
-                    cv.setTabel(featureTypeName);
+                    cv.setTabel(originalFeatureTypeName);
                     cv.setObject_id(res.getInt("id"));
                     values.add(cv);
                 }
